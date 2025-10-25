@@ -135,6 +135,13 @@ export default function RegisterPage() {
           secureTextEntry={true}
         />
       </View>
+        <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+                <Text style={styles.nextButtonText}>
+                    {step === 1 ? 'Continuar' : 'Registrarse'}
+                </Text>
+            </TouchableOpacity>
+        </View>
     </View>
   );
 
@@ -252,23 +259,6 @@ export default function RegisterPage() {
       </View>
 
       {step === 1 ? renderStep1() : renderStep2()}
-
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-          <Text style={styles.nextButtonText}>
-            {step === 1 ? 'Continuar' : 'Registrarse'}
-          </Text>
-        </TouchableOpacity>
-
-        {step === 2 && (
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => setStep(1)}
-          >
-            <Text style={styles.backButtonText}>Atrás</Text>
-          </TouchableOpacity>
-        )}
-      </View>
     </ScrollView>
   );
 }

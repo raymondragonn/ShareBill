@@ -28,7 +28,7 @@ export default function BillsPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#F8F8F8',
   },
   header: {
     backgroundColor: '#FFFFFF',
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     color: '#1C1C1E',
   },
   addButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#8A2BE2',
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   createButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#8A2BE2',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

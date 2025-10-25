@@ -7,8 +7,9 @@ import { View, ActivityIndicator } from 'react-native';
 
 export default function TabLayout() {
     const router = useRouter();
-    const segments = useSegments(); // útil para saber en qué "grupo" estamos
+    const segments = useSegments();
     const [loading, setLoading] = useState(true);
+    const [loggedIn, setLoggedIn] = useState(false);
 
     useEffect(() => {
         const verifySession = async () => {
@@ -17,25 +18,22 @@ export default function TabLayout() {
                 const inAuthGroup = segments[0] === 'auth';
 
                 if (!user && !inAuthGroup) {
-                    // solo redirijo si NO estamos ya en /auth
                     router.replace('/auth/login');
                 } else if (user && inAuthGroup) {
-                    // si hay sesión y estamos en auth, mandamos al home
                     router.replace('/home');
                 }
+
+                setLoggedIn(!!user);
             } catch (error) {
                 console.error('Error verificando sesión:', error);
-                if (segments[0] !== 'auth') {
-                    router.replace('/auth/login');
-                }
+                router.replace('/auth/login');
             } finally {
                 setLoading(false);
             }
         };
 
         verifySession();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [segments]); // re-ejecuta cuando cambien los segmentos
+    }, [segments]);
 
     if (loading) {
         return (
@@ -43,6 +41,10 @@ export default function TabLayout() {
                 <ActivityIndicator size="large" color="#8e09d5" />
             </View>
         );
+    }
+
+    if (!loggedIn && segments[0] !== 'auth') {
+        return null;
     }
 
     return (

@@ -53,7 +53,6 @@ export default function LoginPage() {
             }
 
             await AsyncStorage.setItem("user", JSON.stringify(data));
-
             Alert.alert("Bienvenido", `Hola ${data.nombre}`);
             router.replace("/home"); // ✅ redirige al Home
 

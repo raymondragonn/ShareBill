@@ -14,17 +14,17 @@ export default function PagoCompletadoPage() {
         
         <View style={styles.details}>
           <View style={styles.detailRow}>
-            <Ionicons name="terminal" size={20} color="#8E8E93" />
+            <Ionicons name="terminal" size={20} color="#949494" />
             <Text style={styles.detailText}>TERMINAL</Text>
           </View>
           
           <View style={styles.detailRow}>
-            <Ionicons name="time" size={20} color="#8E8E93" />
+            <Ionicons name="time" size={20} color="#949494" />
             <Text style={styles.detailText}>Espera al Admin</Text>
           </View>
           
           <View style={styles.detailRow}>
-            <Ionicons name="radio" size={20} color="#8E8E93" />
+            <Ionicons name="radio" size={20} color="#949494" />
             <Text style={styles.detailText}>Pago con NFC</Text>
           </View>
         </View>
@@ -56,13 +56,13 @@ export default function PagoCompletadoPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#FFFFFF',
   },
   content: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    padding: 24,
   },
   successIcon: {
     marginBottom: 30,
@@ -70,30 +70,30 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#1C1C1E',
+    color: '#003049',
     textAlign: 'center',
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 16,
-    color: '#8E8E93',
+    color: '#949494',
     textAlign: 'center',
     marginBottom: 40,
   },
   details: {
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderRadius: 12,
+    backgroundColor: '#f2f3f7',
+    padding: 24,
+    borderRadius: 15,
     marginBottom: 30,
     width: '100%',
-    shadowColor: '#000',
+    shadowColor: '#003049',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
   },
   detailRow: {
     flexDirection: 'row',
@@ -102,28 +102,29 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 16,
-    color: '#8E8E93',
+    color: '#949494',
     marginLeft: 12,
+    fontWeight: '500',
   },
   summary: {
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderRadius: 12,
+    backgroundColor: '#f2f3f7',
+    padding: 24,
+    borderRadius: 15,
     marginBottom: 30,
     width: '100%',
-    shadowColor: '#000',
+    shadowColor: '#003049',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
   },
   summaryTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1C1C1E',
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#003049',
     marginBottom: 15,
     textAlign: 'center',
   },
@@ -135,33 +136,42 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 16,
-    color: '#8E8E93',
+    color: '#949494',
+    fontWeight: '500',
   },
   summaryAmount: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1C1C1E',
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#003049',
   },
   summaryMethod: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#34C759',
+    fontWeight: '700',
+    color: '#669BBC',
   },
   summaryDate: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1C1C1E',
+    fontWeight: '700',
+    color: '#003049',
   },
   continueButton: {
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 12,
+    backgroundColor: '#669BBC',
+    padding: 20,
+    borderRadius: 15,
     width: '100%',
     alignItems: 'center',
+    shadowColor: '#003049',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
   },
   continueButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    color: '#FDF0D5',
+    fontSize: 18,
+    fontWeight: '700',
   },
 });

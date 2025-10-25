@@ -6,7 +6,10 @@ import axios from 'axios';
 
 // Configuración de API según la plataforma
 const getApiUrl = () => {
-  if (Platform.OS === 'android') {
+  if (Platform.OS === 'web') {
+    // En web, usar localhost directamente
+    return 'http://localhost:8000';
+  } else if (Platform.OS === 'android') {
     // Android Emulator usa 10.0.2.2 para acceder a localhost del host
     return 'http://10.0.2.2:8000';
   } else if (Platform.OS === 'ios') {
@@ -84,6 +87,7 @@ export default function EscanearTicketPage() {
     console.log('🎫 INICIANDO ESCANEO DE TICKET');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('📸 Imagen seleccionada:', selectedImage);
+    console.log('📱 Plataforma:', Platform.OS);
 
     // Activar el loading
     setIsLoading(true);
@@ -91,24 +95,47 @@ export default function EscanearTicketPage() {
     try {
         // 1. Prepara el FormData
         const formData = new FormData();
-
-        // 2. Preparar la imagen para móvil
         const imageUri = selectedImage;
-        const fileName = imageUri.split('/').pop() || `ticket_${Date.now()}.jpg`;
-        const fileType = fileName.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
 
-        formData.append('imagen', {
-            uri: imageUri,
-            name: fileName,
-            type: fileType,
-        });
+        // 2. Manejar diferente según la plataforma
+        if (Platform.OS === 'web') {
+            console.log('🌐 Detectado: Plataforma WEB');
+            
+            // En web, necesitamos convertir el blob URI a un File
+            const response = await fetch(imageUri);
+            const blob = await response.blob();
+            
+            // Crear un archivo File desde el blob
+            const fileName = `ticket_${Date.now()}.jpg`;
+            const file = new File([blob], fileName, { type: blob.type || 'image/jpeg' });
+            
+            // Agregar el archivo al FormData
+            formData.append('imagen', file);
+            
+            console.log('📦 File creado para web:', {
+                name: fileName,
+                type: file.type,
+                size: file.size
+            });
+        } else {
+            console.log('📱 Detectado: Plataforma MÓVIL');
+            
+            // En móvil nativo, usar el formato URI estándar
+            const fileName = imageUri.split('/').pop() || `ticket_${Date.now()}.jpg`;
+            const fileType = fileName.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
 
-        console.log('📱 Plataforma:', Platform.OS);
-        console.log('📦 FormData preparado:', { 
-          uri: imageUri, 
-          name: fileName, 
-          type: fileType 
-        });
+            formData.append('imagen', {
+                uri: imageUri,
+                name: fileName,
+                type: fileType,
+            });
+
+            console.log('📦 FormData preparado para móvil:', { 
+              uri: imageUri, 
+              name: fileName, 
+              type: fileType 
+            });
+        }
 
         // 3. Configuración del Endpoint
         const BASE_URL = getApiUrl();
@@ -155,7 +182,8 @@ export default function EscanearTicketPage() {
           `Ticket procesado correctamente\n\n` +
           `🏪 Negocio: ${response.data.nombre_negocio || 'N/A'}\n` +
           `🆔 ID: ${response.data.ticket_id || 'N/A'}\n` +
-          `📝 Artículos: ${response.data.articulos?.length || 0}`
+          `📝 Artículos: ${response.data.articulos?.length || 0}\n` +
+          `💰 Total: $${response.data.total?.toFixed(2) || '0.00'}`
         );
 
     } catch (error) {

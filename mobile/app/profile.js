@@ -1,7 +1,30 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 
 export default function ProfilePage() {
+  const handleLogout = () => {
+    Alert.alert(
+      'Cerrar sesión',
+      '¿Estás seguro de que quieres cerrar sesión?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Cerrar sesión',
+          style: 'destructive',
+          onPress: () => {
+            // Aquí puedes agregar lógica adicional como limpiar el almacenamiento local
+            // AsyncStorage.removeItem('userToken');
+            router.replace('/auth/login');
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -18,39 +41,39 @@ export default function ProfilePage() {
 
       <View style={styles.menuSection}>
         <TouchableOpacity style={styles.menuItem}>
-          <Ionicons name="person-outline" size={24} color="#007AFF" />
+          <Ionicons name="person-outline" size={24} color="#669BBC" />
           <Text style={styles.menuText}>Información personal</Text>
-          <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
+          <Ionicons name="chevron-forward" size={20} color="#949494" />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <Ionicons name="notifications-outline" size={24} color="#007AFF" />
+          <Ionicons name="notifications-outline" size={24} color="#669BBC" />
           <Text style={styles.menuText}>Notificaciones</Text>
-          <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
+          <Ionicons name="chevron-forward" size={20} color="#949494" />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <Ionicons name="shield-outline" size={24} color="#007AFF" />
+          <Ionicons name="shield-outline" size={24} color="#669BBC" />
           <Text style={styles.menuText}>Privacidad</Text>
-          <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
+          <Ionicons name="chevron-forward" size={20} color="#949494" />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <Ionicons name="help-circle-outline" size={24} color="#007AFF" />
+          <Ionicons name="help-circle-outline" size={24} color="#669BBC" />
           <Text style={styles.menuText}>Ayuda</Text>
-          <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
+          <Ionicons name="chevron-forward" size={20} color="#949494" />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <Ionicons name="information-circle-outline" size={24} color="#007AFF" />
+          <Ionicons name="information-circle-outline" size={24} color="#669BBC" />
           <Text style={styles.menuText}>Acerca de</Text>
-          <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
+          <Ionicons name="chevron-forward" size={20} color="#949494" />
         </TouchableOpacity>
       </View>
 
       <View style={styles.logoutSection}>
-        <TouchableOpacity style={styles.logoutButton}>
-          <Ionicons name="log-out-outline" size={24} color="#FF3B30" />
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={24} color="#FDF0D5" />
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
       </View>
@@ -61,13 +84,14 @@ export default function ProfilePage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     backgroundColor: '#FFFFFF',
-    padding: 20,
+    padding: 24,
+    paddingTop: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    borderBottomColor: '#949494',
   },
   profileInfo: {
     flexDirection: 'row',
@@ -77,66 +101,81 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#669BBC',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
+    shadowColor: '#003049',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
   },
   avatarText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: '#FDF0D5',
   },
   userInfo: {
     flex: 1,
   },
   userName: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#1C1C1E',
+    fontSize: 25,
+    fontWeight: 'bold',
+    color: '#003049',
     marginBottom: 4,
   },
   userEmail: {
     fontSize: 16,
-    color: '#8E8E93',
+    color: '#949494',
   },
   menuSection: {
-    backgroundColor: '#FFFFFF',
-    marginTop: 20,
-    borderRadius: 12,
-    marginHorizontal: 20,
+    backgroundColor: '#f2f3f7',
+    marginTop: 24,
+    borderRadius: 15,
+    marginHorizontal: 24,
     overflow: 'hidden',
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    borderBottomColor: '#949494',
   },
   menuText: {
     flex: 1,
-    fontSize: 16,
-    color: '#1C1C1E',
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#003049',
     marginLeft: 12,
   },
   logoutSection: {
-    margin: 20,
+    margin: 24,
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#FF3B30',
+    backgroundColor: '#C1121F',
+    padding: 20,
+    borderRadius: 15,
+    shadowColor: '#C1121F',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
   },
   logoutText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FF3B30',
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FDF0D5',
     marginLeft: 8,
   },
 });

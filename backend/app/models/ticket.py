@@ -7,6 +7,7 @@ class Ticket(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     nombre_negocio = Column(String(255), nullable=True)
+    total = Column(Float, nullable=True)
     fecha_procesamiento = Column(DateTime(timezone=True), server_default=func.now())
     imagen_url = Column(Text, nullable=True)
     

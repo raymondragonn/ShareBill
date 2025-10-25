@@ -1,74 +1,133 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function TabLayout() {
   return (
-    <Tabs
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#007AFF',
+        tabBarActiveTintColor: '#8e09d5',
         tabBarInactiveTintColor: '#8E8E93',
+        tabBarShowLabel: false,
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
           borderTopColor: '#E5E5EA',
-          paddingBottom: 5,
-          paddingTop: 5,
-          height: 60,
+          paddingBottom: 15,
+          paddingTop: 10,
+          height: 80,
+          marginBottom: 10,
         },
         headerStyle: {
-          backgroundColor: '#007AFF',
+          backgroundColor: '#8e09d5',
         },
         headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
         },
       }}
+      initialRouteName="home"
     >
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Inicio',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+            <Ionicons name="home" size={size + 4} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="index"
+        options={{
+          href: null,
         }}
       />
       <Tabs.Screen
         name="bills"
         options={{
-          title: 'Facturas',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="receipt" size={size} color={color} />
-          ),
+          href: null,
         }}
       />
       <Tabs.Screen
         name="groups"
         options={{
-          title: 'Grupos',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people" size={size} color={color} />
-          ),
+          href: null,
         }}
       />
+        <Tabs.Screen
+          name="admin/qr"
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="add-circle" size={size + 4} color={color} />
+          ),
+        }}
+        />
+        <Tabs.Screen
+          name="scan-qr"
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="scan" size={size + 4} color={color} />
+            ),
+          }}
+        />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Perfil',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+            <Ionicons name="person" size={size + 4} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="pago-completado"
         options={{
-          title: 'Pago Completado',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="checkmark-circle" size={size} color={color} />
-          ),
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="auth/login"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="auth/register"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="user/productos"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="user/total"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="admin/pago"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="admin/integrantes"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="admin/escanear-ticket"
+        options={{
+          href: null,
         }}
       />
     </Tabs>
+    </GestureHandlerRootView>
   );
 }

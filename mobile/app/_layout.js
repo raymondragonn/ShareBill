@@ -1,9 +1,11 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function TabLayout() {
   return (
-    <Tabs
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Tabs
       screenOptions={{
         tabBarActiveTintColor: '#8e09d5',
         tabBarInactiveTintColor: '#8E8E93',
@@ -126,5 +128,6 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    </GestureHandlerRootView>
   );
 }

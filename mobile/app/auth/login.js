@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from "react-native";
 import { useState } from "react";
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -14,6 +15,11 @@ export default function LoginPage() {
     }
     // Aquí iría la lógica de autenticación
     Alert.alert('Éxito', 'Inicio de sesión exitoso');
+    router.push('/home');
+  };
+
+  const handleRegister = () => {
+    router.push('/auth/register');
   };
 
   return (
@@ -65,7 +71,7 @@ export default function LoginPage() {
           <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.registerLink}>
+        <TouchableOpacity style={styles.registerLink} onPress={handleRegister}>
           <Text style={styles.registerText}>¿No tienes cuenta? Regístrate</Text>
         </TouchableOpacity>
       </View>

@@ -1,14 +1,23 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, Platform, Dimensions } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function LoginPage() {
+    const params = useLocalSearchParams();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [groupCode, setGroupCode] = useState(null);
+
+    useEffect(() => {
+        // Detectar si viene de un link de invitación
+        if (params.groupCode) {
+            setGroupCode(params.groupCode);
+        }
+    }, [params]);
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Contraseña</Text>
@@ -54,6 +63,38 @@ export default function LoginPage() {
             }
 
             await AsyncStorage.setItem("user", JSON.stringify(data));
+            
+            // Si viene de un link de invitación, unirlo al grupo y redirigir
+            if (groupCode) {
+                try {
+                    console.log('Intentando unirse al grupo con código:', groupCode, 'user_id:', data.id);
+                    const joinResponse = await fetch(`http://localhost:8000/groups/join-by-code?code=${groupCode}&user_id=${data.id}`, {
+                        method: 'POST'
+                    });
+                    
+                    const joinData = await joinResponse.json();
+                    console.log('Respuesta del servidor:', joinResponse.status, joinData);
+                    
+                    if (joinResponse.ok) {
+                        Alert.alert("¡Bienvenido!", `Te has unido al grupo exitosamente`);
+                    } else {
+                        console.error('Error al unirse:', joinData);
+                        Alert.alert("Aviso", "Ya estás en este grupo o hubo un problema al unirte");
+                    }
+                    
+                    // Redirigir SIEMPRE a waiting room si hay groupCode
+                    router.replace(`/user/waiting-room?code=${groupCode}`);
+                    return;
+                    
+                } catch (error) {
+                    console.error('Error al unirse al grupo:', error);
+                    Alert.alert("Error", "No se pudo conectar con el servidor del grupo");
+                    // Aún así redirigir a waiting room
+                    router.replace(`/user/waiting-room?code=${groupCode}`);
+                    return;
+                }
+            }
+            
             Alert.alert("Bienvenido", `Hola ${data.nombre}`);
             router.replace("/home"); // ✅ redirige al Home
 
@@ -64,7 +105,12 @@ export default function LoginPage() {
     };
 
     const handleRegister = () => {
-        router.push('/auth/register');
+        // Si viene de una invitación, pasar el código al registro
+        if (groupCode) {
+            router.push(`/auth/register?groupCode=${groupCode}`);
+        } else {
+            router.push('/auth/register');
+        }
     };
 
     return (

@@ -199,7 +199,16 @@ def join_group_by_code(code: str, user_id: int, db: Session = Depends(get_db)):
     ).first()
     
     if existing_member:
-        raise HTTPException(status_code=400, detail="Ya eres miembro de este grupo")
+        # Si ya es miembro, solo retornar la info del grupo
+        return {
+            "message": "Ya eres miembro de este grupo",
+            "group": {
+                "id": group.id,
+                "name": group.name,
+                "join_link": group.join_link,
+                "qr_code": group.qr_code
+            }
+        }
     
     # Agregar miembro
     new_member = GroupMember(
@@ -214,7 +223,9 @@ def join_group_by_code(code: str, user_id: int, db: Session = Depends(get_db)):
         "message": "Te has unido al grupo exitosamente",
         "group": {
             "id": group.id,
-            "name": group.name
+            "name": group.name,
+            "join_link": group.join_link,
+            "qr_code": group.qr_code
         }
     }
 

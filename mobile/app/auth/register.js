@@ -1,12 +1,27 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ScrollView, Platform, Dimensions } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function RegisterPage() {
     const router = useRouter();
+    const params = useLocalSearchParams();
     const [step, setStep] = useState(1);
+    const [groupCode, setGroupCode] = useState(null);
+
+    useEffect(() => {
+        // Detectar si viene de un link de invitación
+        console.log('🔍 Params recibidos:', params);
+        console.log('🔍 GroupCode en params:', params.groupCode);
+        if (params.groupCode) {
+            console.log('✅ GroupCode detectado:', params.groupCode);
+            setGroupCode(params.groupCode);
+        } else {
+            console.log('❌ No se detectó groupCode en params');
+        }
+    }, [params]);
     const [formData, setFormData] = useState({
         nombre: '',
         apellido: '',
@@ -50,6 +65,47 @@ export default function RegisterPage() {
                 }
 
                 const data = await response.json();
+                console.log('👤 Usuario registrado:', data);
+                
+                // Guardar usuario en AsyncStorage
+                await AsyncStorage.setItem("user", JSON.stringify(data));
+                
+                // Si viene de un link de invitación, unirlo al grupo y redirigir
+                console.log('🔑 GroupCode actual:', groupCode);
+                if (groupCode) {
+                    console.log('🎯 Entrando en lógica de grupo...');
+                    try {
+                        console.log('Intentando unirse al grupo con código:', groupCode, 'user_id:', data.id);
+                        const joinResponse = await fetch(`http://localhost:8000/groups/join-by-code?code=${groupCode}&user_id=${data.id}`, {
+                            method: 'POST'
+                        });
+                        
+                        const joinData = await joinResponse.json();
+                        console.log('Respuesta del servidor:', joinResponse.status, joinData);
+                        
+                        if (joinResponse.ok) {
+                            Alert.alert("¡Bienvenido!", `Te has unido al grupo exitosamente`);
+                        } else {
+                            console.error('Error al unirse:', joinData);
+                            Alert.alert("Aviso", "Ya estás en este grupo o hubo un problema al unirte");
+                        }
+                        
+                        // Redirigir SIEMPRE a waiting room si hay groupCode
+                        console.log('🚀 Redirigiendo a waiting room con código:', groupCode);
+                        router.replace(`/user/waiting-room?code=${groupCode}`);
+                        return;
+                        
+                    } catch (error) {
+                        console.error('Error al unirse al grupo:', error);
+                        Alert.alert("Error", "No se pudo conectar con el servidor del grupo");
+                        // Aún así redirigir a waiting room
+                        console.log('🚀 Redirigiendo a waiting room (con error) con código:', groupCode);
+                        router.replace(`/user/waiting-room?code=${groupCode}`);
+                        return;
+                    }
+                }
+                
+                console.log('⚠️ No hay groupCode, continuando al paso 2');
                 Alert.alert("Éxito", `Usuario ${data.nombre} registrado`);
                 setStep(2);
 

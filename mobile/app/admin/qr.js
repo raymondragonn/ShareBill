@@ -1,10 +1,11 @@
-import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView, Animated, Modal, Platform, Dimensions, Image, ActivityIndicator } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView, Animated, Modal, Platform, Dimensions, Image, ActivityIndicator, Share } from "react-native";
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Clipboard from 'expo-clipboard';
 
 export default function AdminQRPage() {
   const router = useRouter();
@@ -65,13 +66,18 @@ export default function AdminQRPage() {
     }
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     if (groupData) {
-      const message = `¡Únete a mi grupo "${groupData.name}" en ShareBill!\n\nCódigo: ${groupData.join_link}\n\nÚsalo para unirte al grupo y dividir la cuenta.`;
-      Alert.alert('Compartir', message);
-      // Aquí podrías implementar Share de React Native para compartir por WhatsApp
-      // import { Share } from 'react-native';
-      // Share.share({ message });
+      // Crear link de invitación
+      const inviteLink = `http://localhost:8081/auth/register?groupCode=${groupData.join_link}`;
+      
+      try {
+        // Copiar directamente al portapapeles
+        await Clipboard.setStringAsync(inviteLink);
+        Alert.alert('✓ Link copiado', 'Ahora puedes pegarlo en WhatsApp');
+      } catch (error) {
+        Alert.alert('Error', 'No se pudo copiar el link');
+      }
     }
   };
 

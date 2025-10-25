@@ -4,6 +4,4 @@ sqlalchemy
 psycopg2-binary
 pydantic
 python-dotenv
-google-generativeai
-pillow
-python-multipart
+email-validator

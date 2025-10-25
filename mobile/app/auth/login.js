@@ -60,8 +60,8 @@ export default function LoginPage() {
             >
               <Ionicons 
                 name={showPassword ? "eye-off" : "eye"} 
-                size={20} 
-                color="#8E8E93" 
+                size={24} 
+                color="#669BBC" 
               />
             </TouchableOpacity>
           </View>
@@ -82,85 +82,99 @@ export default function LoginPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#FDF0D5',
   },
   header: {
     alignItems: 'center',
-    paddingTop: 80,
-    paddingBottom: 40,
+    paddingTop: 100,
+    paddingBottom: 50,
   },
   title: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: 'bold',
-    color: '#007AFF',
-    marginBottom: 8,
+    color: '#003049',
+    marginBottom: 12,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
+    fontSize: 18,
+    color: '#669BBC',
+    fontWeight: '500',
   },
   form: {
     flex: 1,
-    padding: 20,
+    padding: 24,
   },
   formTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#1C1C1E',
-    marginBottom: 30,
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#003049',
+    marginBottom: 40,
     textAlign: 'center',
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#1C1C1E',
-    marginBottom: 8,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#003049',
+    marginBottom: 12,
   },
   input: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E5E5EA',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
+    backgroundColor: '#FDF0D5',
+    borderWidth: 3,
+    borderColor: '#669BBC',
+    borderRadius: 20,
+    padding: 20,
+    fontSize: 18,
+    color: '#003049',
+    fontWeight: '500',
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E5E5EA',
-    borderRadius: 12,
+    backgroundColor: '#FDF0D5',
+    borderWidth: 3,
+    borderColor: '#669BBC',
+    borderRadius: 20,
   },
   passwordInput: {
     flex: 1,
-    padding: 16,
-    fontSize: 16,
+    padding: 20,
+    fontSize: 18,
+    color: '#003049',
+    fontWeight: '500',
   },
   eyeButton: {
-    padding: 16,
+    padding: 20,
   },
   loginButton: {
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 12,
+    backgroundColor: '#C1121F',
+    padding: 20,
+    borderRadius: 28,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 30,
+    shadowColor: '#780000',
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 10,
   },
   loginButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    color: '#FDF0D5',
+    fontSize: 20,
+    fontWeight: '700',
   },
   registerLink: {
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 30,
   },
   registerText: {
-    color: '#007AFF',
-    fontSize: 16,
+    color: '#003049',
+    fontSize: 18,
+    fontWeight: '600',
   },
 });

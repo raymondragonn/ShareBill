@@ -1,25 +1,35 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import SessionLocal
 from app.models.user import User
+from app.database import get_db
+from pydantic import BaseModel, EmailStr
 
-router = APIRouter(prefix="/users")
+router = APIRouter(prefix="/users", tags=["Users"])
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+class UserCreate(BaseModel):
+    nombre: str
+    apellido: str
+    email: EmailStr
+    password: str
 
-@router.get("/")
-def get_users(db: Session = Depends(get_db)):
-    return db.query(User).all()
+class UserResponse(BaseModel):
+    id: int
+    nombre: str
+    apellido: str
+    email: EmailStr
 
-@router.post("/")
-def create_user(name: str, email: str, db: Session = Depends(get_db)):
-    user = User(name=name, email=email)
-    db.add(user)
+    class Config:
+        orm_mode = True
+
+
+@router.post("/signup", response_model=UserResponse)
+def signup(user: UserCreate, db: Session = Depends(get_db)):
+    existing = db.query(User).filter(User.email == user.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    new_user = User(**user.dict())
+    db.add(new_user)
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(new_user)
+    return new_user

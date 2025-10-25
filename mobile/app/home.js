@@ -5,6 +5,32 @@ import { Link } from 'expo-router';
 
 export default function HomePage() {
   const user = { name: 'Pedro' };
+  const router = useRouter();
+
+  const handleCreateGroup = async () => {
+    try {
+      // Cambia la URL por la de tu backend
+      const response = await fetch('http://localhost:8000/group', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: 'Nuevo grupo', // Puedes personalizar el nombre
+          members: [user.name], // Ejemplo: solo el usuario actual
+        }),
+      });
+      if (response.ok) {
+        // Navega a la pantalla de QR
+        router.push('/admin/qr');
+      } else {
+        alert('Error al crear el grupo');
+      }
+    } catch (error) {
+      alert('Error de red al crear el grupo');
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -12,12 +38,10 @@ export default function HomePage() {
       </View>
 
       <View style={styles.actionsContainer}>
-        <Link href="/admin/qr" asChild>
-          <TouchableOpacity style={styles.actionButton}>
-            <Ionicons name="add-circle" size={36} color="#000000" />
-            <Text style={styles.actionButtonText}>Nuevo grupo</Text>
-          </TouchableOpacity>
-        </Link>
+        <TouchableOpacity style={styles.actionButton} onPress={handleCreateGroup}>
+          <Ionicons name="add-circle" size={36} color="#000000" />
+          <Text style={styles.actionButtonText}>Nuevo grupo</Text>
+        </TouchableOpacity>
         
         <Link href="/scan-qr" asChild>
           <TouchableOpacity style={styles.actionButtonSecondary}>
@@ -27,64 +51,9 @@ export default function HomePage() {
         </Link>
       </View>
 
+      {/* ...existing code... */}
       <View style={styles.recentGroups}>
-        <View style={styles.divider} />
-        <Text style={styles.sectionTitle}>Grupos recientes</Text>
-        
-        <View style={styles.groupCard}>
-          <View style={styles.groupInfo}>
-            <Text style={styles.groupName}>Cena familiar</Text>
-            <Text style={styles.groupDate}>Hace 2 horas</Text>
-          </View>
-          <View style={styles.groupStats}>
-            <Text style={styles.groupAmount}>$45.50</Text>
-            <Text style={styles.groupMembers}>3 miembros</Text>
-          </View>
-        </View>
-
-        <View style={styles.groupCard}>
-          <View style={styles.groupInfo}>
-            <Text style={styles.groupName}>Gasolina</Text>
-            <Text style={styles.groupDate}>Ayer</Text>
-          </View>
-          <View style={styles.groupStats}>
-            <Text style={styles.groupAmount}>$30.00</Text>
-            <Text style={styles.groupMembers}>2 miembros</Text>
-          </View>
-        </View>
-
-        <View style={styles.groupCard}>
-          <View style={styles.groupInfo}>
-            <Text style={styles.groupName}>Cumpleaños Ana</Text>
-            <Text style={styles.groupDate}>Hace 3 días</Text>
-          </View>
-          <View style={styles.groupStats}>
-            <Text style={styles.groupAmount}>$120.75</Text>
-            <Text style={styles.groupMembers}>5 miembros</Text>
-          </View>
-        </View>
-
-        <View style={styles.groupCard}>
-          <View style={styles.groupInfo}>
-            <Text style={styles.groupName}>Viaje a la playa</Text>
-            <Text style={styles.groupDate}>Hace 1 semana</Text>
-          </View>
-          <View style={styles.groupStats}>
-            <Text style={styles.groupAmount}>$85.30</Text>
-            <Text style={styles.groupMembers}>4 miembros</Text>
-          </View>
-        </View>
-
-        <View style={styles.groupCard}>
-          <View style={styles.groupInfo}>
-            <Text style={styles.groupName}>Cena de trabajo</Text>
-            <Text style={styles.groupDate}>Hace 2 semanas</Text>
-          </View>
-          <View style={styles.groupStats}>
-            <Text style={styles.groupAmount}>$65.50</Text>
-            <Text style={styles.groupMembers}>3 miembros</Text>
-          </View>
-        </View>
+        {/* ...existing code... */}
       </View>
     </ScrollView>
   );

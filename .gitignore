@@ -1,0 +1,21 @@
+# Python / FastAPI
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# Node / Expo
+node_modules/
+.expo/
+.expo-shared/
+dist/
+build/
+web-build/
+
+# Docker
+db_data/
+*.log
+
+# System
+.DS_Store

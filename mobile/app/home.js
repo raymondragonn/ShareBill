@@ -19,6 +19,12 @@ export default function HomePage() {
           </TouchableOpacity>
         </Link>
         
+        <Link href="/scan-qr" asChild>
+          <TouchableOpacity style={styles.actionButtonSecondary}>
+            <Ionicons name="qr-code" size={36} color="#007AFF" />
+            <Text style={styles.actionButtonTextSecondary}>Unirme a grupo</Text>
+          </TouchableOpacity>
+        </Link>
       </View>
 
       <View style={styles.recentGroups}>

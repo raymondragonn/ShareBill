@@ -52,10 +52,34 @@ export default function TabLayout() {
           href: null,
         }}
       />
+        <Tabs.Screen
+          name="admin/qr"
+          options={{
+            title: 'Nuevo Grupo',
+            href: 'admin/qr',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="add-circle" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="scan-qr"
+          options={{
+            title: 'Unirse a grupo',
+            href: 'scan-qr',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="scan" size={size} color={color} />
+            ),
+          }}
+        />
       <Tabs.Screen
         name="profile"
         options={{
-          href: null,
+          title: 'Perfil',
+          href: 'profile',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -73,7 +97,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="auth/register"
         options={{
-          href: '/auth/register',
+          href: null,
         }}
       />
       <Tabs.Screen
@@ -84,12 +108,6 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="user/total"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="admin/qr"
         options={{
           href: null,
         }}

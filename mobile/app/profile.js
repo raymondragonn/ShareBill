@@ -1,7 +1,30 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 
 export default function ProfilePage() {
+  const handleLogout = () => {
+    Alert.alert(
+      'Cerrar sesión',
+      '¿Estás seguro de que quieres cerrar sesión?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Cerrar sesión',
+          style: 'destructive',
+          onPress: () => {
+            // Aquí puedes agregar lógica adicional como limpiar el almacenamiento local
+            // AsyncStorage.removeItem('userToken');
+            router.replace('/auth/login');
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -49,7 +72,7 @@ export default function ProfilePage() {
       </View>
 
       <View style={styles.logoutSection}>
-        <TouchableOpacity style={styles.logoutButton}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={24} color="#FDF0D5" />
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>

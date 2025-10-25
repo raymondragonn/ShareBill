@@ -11,7 +11,7 @@ app = FastAPI(title="Backend ShareBill")
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8081"],  # Cambia a IP específica después
+    allow_origins=["*"],  # Cambia a IP específica después
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

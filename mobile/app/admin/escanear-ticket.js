@@ -1,0 +1,453 @@
+import { StyleSheet, Text, View, TouchableOpacity, Image, Alert, ActivityIndicator, Platform } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
+import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios';
+
+// Configuración de API según la plataforma
+const getApiUrl = () => {
+  if (Platform.OS === 'android') {
+    // Android Emulator usa 10.0.2.2 para acceder a localhost del host
+    return 'http://10.0.2.2:8000';
+  } else if (Platform.OS === 'ios') {
+    // iOS Simulator puede usar localhost directamente
+    return 'http://localhost:8000';
+  } else {
+    // Dispositivo físico - CAMBIA ESTA IP POR LA DE TU COMPUTADORA
+    // Puedes obtenerla con: ipconfig (Windows) o ifconfig (Mac/Linux)
+    return 'http://10.22.124.98:8000'; // Cambia esta IP
+  }
+};
+
+export default function EscanearTicketPage() {
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const requestPermissions = async () => {
+    const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
+    const mediaPermission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+    if (cameraPermission.status !== 'granted' || mediaPermission.status !== 'granted') {
+      Alert.alert('Permisos necesarios', 'Necesitamos permisos de cámara y galería para continuar');
+      return false;
+    }
+    return true;
+  };
+
+  const handleTakePhoto = async () => {
+    const hasPermission = await requestPermissions();
+    if (!hasPermission) return;
+
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        setSelectedImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo abrir la cámara');
+    }
+  };
+
+  const handlePickImage = async () => {
+    const hasPermission = await requestPermissions();
+    if (!hasPermission) return;
+
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        setSelectedImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo abrir la galería');
+    }
+  };
+
+  const handleScanTicket = async () => {
+    if (!selectedImage) {
+        Alert.alert('Sin imagen', 'Por favor, toma o selecciona una foto del ticket primero');
+        return;
+    }
+
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🎫 INICIANDO ESCANEO DE TICKET');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📸 Imagen seleccionada:', selectedImage);
+
+    // Activar el loading
+    setIsLoading(true);
+
+    try {
+        // 1. Prepara el FormData
+        const formData = new FormData();
+
+        // 2. Preparar la imagen para móvil
+        const imageUri = selectedImage;
+        const fileName = imageUri.split('/').pop() || `ticket_${Date.now()}.jpg`;
+        const fileType = fileName.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+
+        formData.append('imagen', {
+            uri: imageUri,
+            name: fileName,
+            type: fileType,
+        });
+
+        console.log('📱 Plataforma:', Platform.OS);
+        console.log('📦 FormData preparado:', { 
+          uri: imageUri, 
+          name: fileName, 
+          type: fileType 
+        });
+
+        // 3. Configuración del Endpoint
+        const BASE_URL = getApiUrl();
+        const API_URL = `${BASE_URL}/tickets/procesar`;
+        
+        console.log('🌐 Enviando petición a:', API_URL);
+        console.log('⏳ Esperando respuesta del servidor...');
+        const startTime = Date.now();
+        
+        const response = await axios.post(
+            API_URL,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                timeout: 30000,
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    console.log(`📤 Progreso de subida: ${percentCompleted}%`);
+                },
+            }
+        );
+
+        const endTime = Date.now();
+        const duration = ((endTime - startTime) / 1000).toFixed(2);
+
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('✅ RESPUESTA EXITOSA DEL SERVIDOR');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('⏱️  Tiempo de respuesta:', duration, 'segundos');
+        console.log('📊 Status:', response.status);
+        console.log('📄 Headers:', JSON.stringify(response.headers, null, 2));
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('💾 DATOS RECIBIDOS:');
+        console.log(JSON.stringify(response.data, null, 2));
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+        // Desactivar el loading
+        setIsLoading(false);
+
+        Alert.alert(
+          '✅ Éxito', 
+          `Ticket procesado correctamente\n\n` +
+          `🏪 Negocio: ${response.data.nombre_negocio || 'N/A'}\n` +
+          `🆔 ID: ${response.data.ticket_id || 'N/A'}\n` +
+          `📝 Artículos: ${response.data.articulos?.length || 0}`
+        );
+
+    } catch (error) {
+        // Desactivar el loading en caso de error
+        setIsLoading(false);
+
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('❌ ERROR AL PROCESAR TICKET');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+        let errorMessage = 'Error desconocido al procesar el ticket.';
+
+        if (axios.isAxiosError(error) && error.response) {
+            console.error("🔴 Error HTTP:", error.response.status);
+            console.error("📄 Respuesta del Backend:", JSON.stringify(error.response.data, null, 2));
+            console.error("📋 Headers:", JSON.stringify(error.response.headers, null, 2));
+
+            if (error.response.status === 422) {
+                errorMessage = "Error de validación (422): Verifica el formato de la imagen.";
+            } else {
+                errorMessage = `Error ${error.response.status}: ${JSON.stringify(error.response.data)}`;
+            }
+        } else if (axios.isAxiosError(error) && error.request) {
+            console.error("🌐 Error de red - No se recibió respuesta");
+            console.error("📡 Request:", error.request);
+            errorMessage = "Error de conexión. Verifica que el backend esté corriendo.";
+        } else {
+            console.error("⚠️  Error:", error.message);
+            errorMessage = error.message;
+        }
+        
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        Alert.alert('❌ Error', errorMessage);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Escanear Ticket</Text>
+        <View style={styles.placeholder} />
+      </View>
+
+      <View style={styles.content}>
+        <View style={styles.imageContainer}>
+          {selectedImage ? (
+            <View style={styles.imageWrapper}>
+              <Image source={{ uri: selectedImage }} style={styles.ticketImage} />
+              <TouchableOpacity 
+                style={styles.removeButton}
+                onPress={handleRemoveImage}
+              >
+                <Ionicons name="close-circle" size={32} color="#FF3B30" />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.placeholderContainer}>
+              <Ionicons name="receipt-outline" size={80} color="#C7C7CC" />
+              <Text style={styles.placeholderText}>No hay imagen seleccionada</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Loading Overlay */}
+        {isLoading && (
+          <View style={styles.loadingOverlay}>
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#007AFF" />
+              <Text style={styles.loadingText}>Procesando ticket...</Text>
+              <Text style={styles.loadingSubtext}>Esto puede tardar unos segundos</Text>
+            </View>
+          </View>
+        )}
+
+        <Text style={styles.instructionText}>
+          Toma una foto o selecciona una imagen del ticket
+        </Text>
+
+        <View style={styles.buttonGroup}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={handleTakePhoto}
+          >
+            <Ionicons name="camera" size={28} color="#007AFF" />
+            <Text style={styles.actionButtonText}>Tomar Foto</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={handlePickImage}
+          >
+            <Ionicons name="images" size={28} color="#007AFF" />
+            <Text style={styles.actionButtonText}>Subir Foto</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity 
+          style={[
+            styles.scanButton,
+            (!selectedImage || isLoading) && styles.scanButtonDisabled
+          ]}
+          onPress={handleScanTicket}
+          disabled={!selectedImage || isLoading}
+        >
+          {isLoading ? (
+            <>
+              <ActivityIndicator size="small" color="#FFFFFF" />
+              <Text style={styles.scanButtonText}>PROCESANDO...</Text>
+            </>
+          ) : (
+            <>
+              <Ionicons 
+                name="scan" 
+                size={24} 
+                color="#FFFFFF" 
+              />
+              <Text style={styles.scanButtonText}>ESCANEAR TICKET</Text>
+            </>
+          )}
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F2F2F7',
+  },
+  header: {
+    backgroundColor: '#007AFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
+    paddingTop: 50,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  placeholder: {
+    width: 40,
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+  },
+  imageContainer: {
+    width: '100%',
+    height: 300,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
+    overflow: 'hidden',
+  },
+  imageWrapper: {
+    flex: 1,
+    position: 'relative',
+  },
+  ticketImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
+  },
+  removeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+  },
+  placeholderContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  placeholderText: {
+    fontSize: 16,
+    color: '#8E8E93',
+    marginTop: 16,
+  },
+  instructionText: {
+    fontSize: 16,
+    color: '#8E8E93',
+    textAlign: 'center',
+    marginBottom: 30,
+  },
+  buttonGroup: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 30,
+    gap: 16,
+  },
+  actionButton: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  actionButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#007AFF',
+    marginTop: 8,
+  },
+  scanButton: {
+    backgroundColor: '#007AFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 18,
+    borderRadius: 12,
+    gap: 10,
+  },
+  scanButtonDisabled: {
+    backgroundColor: '#C7C7CC',
+  },
+  scanButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  loadingContainer: {
+    backgroundColor: '#FFFFFF',
+    padding: 30,
+    borderRadius: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1C1C1E',
+  },
+  loadingSubtext: {
+    marginTop: 8,
+    fontSize: 14,
+    color: '#8E8E93',
+    textAlign: 'center',
+  },
+});

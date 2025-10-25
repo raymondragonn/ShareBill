@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ScrollView } from "react-native";
 import { useState } from "react";
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { useRouter } from "expo-router";
 
 export default function RegisterPage() {
   const [step, setStep] = useState(1);
@@ -18,28 +18,55 @@ export default function RegisterPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleNext = () => {
-    if (step === 1) {
-      if (!formData.nombre || !formData.apellido || !formData.email || !formData.password) {
-        Alert.alert('Error', 'Por favor completa todos los campos');
-        return;
-      }
-      if (formData.password !== formData.confirmPassword) {
-        Alert.alert('Error', 'Las contraseñas no coinciden');
-        return;
-      }
-      setStep(2);
-    } else {
-      if (!formData.cardNumber || !formData.expiryDate || !formData.cvc || !formData.postalCode) {
-        Alert.alert('Error', 'Por favor completa todos los campos de pago');
-        return;
-      }
-      Alert.alert('Éxito', 'Registro completado');
-      router.push('/home');
-    }
-  };
+    const handleNext = async () => {
+        if (step === 1) {
+            if (!formData.nombre || !formData.apellido || !formData.email || !formData.password) {
+                Alert.alert('Error', 'Por favor completa todos los campos');
+                return;
+            }
+            if (formData.password !== formData.confirmPassword) {
+                Alert.alert('Error', 'Las contraseñas no coinciden');
+                return;
+            }
 
-  const renderStep1 = () => (
+            // Aquí puedes enviar los datos al backend
+            try {
+                const response = await fetch("http://localhost:8000/users/signup", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        nombre: formData.nombre,
+                        apellido: formData.apellido,
+                        email: formData.email,
+                        password: formData.password,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    Alert.alert("Error", data.detail || "Error al registrarse");
+                    return;
+                }
+
+                const data = await response.json();
+                Alert.alert("Éxito", `Usuario ${data.nombre} registrado`);
+                setStep(2); // pasar a la parte de pago
+
+            } catch (error) {
+                Alert.alert("Error", "No se pudo conectar con el servidor");
+            }
+
+        } else {
+            if (!formData.cardNumber || !formData.expiryDate || !formData.cvc || !formData.postalCode) {
+                Alert.alert('Error', 'Por favor completa todos los campos de pago');
+                return;
+            }
+            Alert.alert('Éxito', 'Registro completado');
+        }
+    };
+
+
+    const renderStep1 = () => (
     <View style={styles.form}>
       <Text style={styles.formTitle}>Crear Cuenta</Text>
       
@@ -111,60 +138,113 @@ export default function RegisterPage() {
     </View>
   );
 
-  const renderStep2 = () => (
-    <View style={styles.form}>
-      <Text style={styles.formTitle}>Información de Pago</Text>
-      <Text style={styles.stepDescription}>Agrega tu método de pago para completar el registro</Text>
-      
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>No. Tarjeta</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="1234 5678 9012 3456"
-          value={formData.cardNumber}
-          onChangeText={(text) => setFormData({...formData, cardNumber: text})}
-          keyboardType="numeric"
-        />
-      </View>
+    const renderStep2 = () => {
+        const router = useRouter();
+        const handleRegisterPayment = async () => {
+            if (!formData.cardNumber || !formData.expiryDate || !formData.cvc || !formData.postalCode) {
+                Alert.alert('Error', 'Por favor completa todos los campos de pago');
+                return;
+            }
 
-      <View style={styles.rowContainer}>
-        <View style={styles.halfInput}>
-          <Text style={styles.label}>Fecha vencimiento</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="MM/AA"
-            value={formData.expiryDate}
-            onChangeText={(text) => setFormData({...formData, expiryDate: text})}
-            keyboardType="numeric"
-          />
-        </View>
-        <View style={styles.halfInput}>
-          <Text style={styles.label}>CVC</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="123"
-            value={formData.cvc}
-            onChangeText={(text) => setFormData({...formData, cvc: text})}
-            keyboardType="numeric"
-            secureTextEntry={true}
-          />
-        </View>
-      </View>
+            try {
+                // ⚙️ Ajusta esta URL según tu entorno
+                const response = await fetch("http://localhost:8000/payments/add", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        card_number: formData.cardNumber,
+                        expiry_date: formData.expiryDate,
+                        cvc: formData.cvc,
+                        postal_code: formData.postalCode,
+                        user_id: 1, // 👈 temporal hasta conectar con el registro real
+                    }),
+                });
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>CP</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="12345"
-          value={formData.postalCode}
-          onChangeText={(text) => setFormData({...formData, postalCode: text})}
-          keyboardType="numeric"
-        />
-      </View>
-    </View>
-  );
+                if (!response.ok) {
+                    const data = await response.json();
+                    Alert.alert("Error", data.detail || "No se pudo registrar el método de pago");
+                    return;
+                }
 
-  return (
+                const data = await response.json();
+                Alert.alert("Éxito", "Método de pago registrado correctamente");
+                // Aquí podrías navegar al dashboard o login
+                console.log("Payment saved:", data);
+                router.replace("/home");
+
+            } catch (error) {
+                console.error("Error al conectar con el servidor:", error);
+                Alert.alert("Error", "No se pudo conectar con el servidor");
+            }
+        };
+
+        return (
+            <View style={styles.form}>
+                <Text style={styles.formTitle}>Información de Pago</Text>
+                <Text style={styles.stepDescription}>Agrega tu método de pago para completar el registro</Text>
+
+                <View style={styles.inputContainer}>
+                    <Text style={styles.label}>No. Tarjeta</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="1234 5678 9012 3456"
+                        value={formData.cardNumber}
+                        onChangeText={(text) => setFormData({ ...formData, cardNumber: text })}
+                        keyboardType="numeric"
+                    />
+                </View>
+
+                <View style={styles.rowContainer}>
+                    <View style={styles.halfInput}>
+                        <Text style={styles.label}>Fecha vencimiento</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="MM/AA"
+                            value={formData.expiryDate}
+                            onChangeText={(text) => setFormData({ ...formData, expiryDate: text })}
+                            keyboardType="numeric"
+                        />
+                    </View>
+                    <View style={styles.halfInput}>
+                        <Text style={styles.label}>CVC</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="123"
+                            value={formData.cvc}
+                            onChangeText={(text) => setFormData({ ...formData, cvc: text })}
+                            keyboardType="numeric"
+                            secureTextEntry={true}
+                        />
+                    </View>
+                </View>
+
+                <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Código Postal</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="12345"
+                        value={formData.postalCode}
+                        onChangeText={(text) => setFormData({ ...formData, postalCode: text })}
+                        keyboardType="numeric"
+                    />
+                </View>
+
+                <TouchableOpacity style={styles.nextButton} onPress={handleRegisterPayment}>
+                    <Text style={styles.nextButtonText}>Registrar Pago</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => setStep(1)}
+                >
+                    <Text style={styles.backButtonText}>Atrás</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    };
+
+
+    return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>ShareBill</Text>

@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView, Animated, Modal } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView, Animated, Modal, Platform, Dimensions } from "react-native";
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useRef } from 'react';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function AdminQRPage() {
   const router = useRouter();
@@ -126,12 +127,23 @@ export default function AdminQRPage() {
   };
 
   const QRContent = () => (
-    <View style={styles.tabContent}>
-      <View style={styles.qrContainer}>
-        <View style={styles.qrCode}>
-          <Ionicons name="qr-code" size={120} color="#1C1C1E" />
+    <View style={styles.content}>
+      <View style={styles.scannerContainer}>
+        <View style={styles.scannerFrame}>
+          <View style={styles.qrIconContainer}>
+            <Ionicons name="qr-code" size={80} color="#1E40AF" />
+          </View>
         </View>
-        <Text style={styles.qrLabel}>Código QR</Text>
+        <Text style={styles.scannerLabel}>Código QR del Grupo</Text>
+        <Text style={styles.scannerSubtext}>
+          Comparte este código QR para que otros se unan al grupo
+        </Text>
+      </View>
+
+      <View style={styles.divider}>
+        <View style={styles.dividerLine} />
+        <Text style={styles.dividerText}>O</Text>
+        <View style={styles.dividerLine} />
       </View>
 
       <View style={styles.codeContainer}>
@@ -139,16 +151,17 @@ export default function AdminQRPage() {
         <Text style={styles.codeValue}>{groupCode}</Text>
       </View>
 
-      <View style={styles.qrInfo}>
-        <Text style={styles.qrInfoLabel}>QR {qrCode}</Text>
-      </View>
-
       <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-        <Ionicons name="logo-whatsapp" size={24} color="#FFFFFF" />
+        <View style={styles.buttonIconContainer}>
+          <Ionicons name="logo-whatsapp" size={20} color="#FFFFFF" />
+        </View>
         <Text style={styles.shareButtonText}>Compartir por WhatsApp</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
+        <View style={styles.buttonIconContainer}>
+          <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
+        </View>
         <Text style={styles.continueButtonText}>CONTINUAR</Text>
       </TouchableOpacity>
     </View>
@@ -207,11 +220,17 @@ export default function AdminQRPage() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Crear Grupo</Text>
-      </View>
+      {/* Header con gradiente bancario */}
+      <LinearGradient
+        colors={['#1e3c72', '#2a5298', '#3b82f6']}
+        style={styles.headerGradient}
+      >
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Crear Grupo</Text>
+        </View>
+      </LinearGradient>
 
-      {/* Barra de navegación con pestañas */}
+      {/* Barra de navegación con pestañas flotante */}
       <View style={styles.tabBar}>
         <TouchableOpacity 
           style={[styles.tab, activeTab === 'QR' && styles.activeTab]}
@@ -339,33 +358,45 @@ export default function AdminQRPage() {
   );
 }
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8FAFC',
+  },
+  
+  // Header con gradiente
+  headerGradient: {
+    paddingTop: Platform.OS === 'ios' ? 50 : 30,
+    paddingBottom: 30,
   },
   header: {
-    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
-    paddingTop: 16,
-    paddingBottom: 0,
-    borderBottomWidth: 1,
-    borderBottomColor: '#949494',
+    paddingHorizontal: 24,
   },
   headerTitle: {
-    fontSize: 25,
-    fontWeight: 'bold',
-    color: '#003049',
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
-  // Estilos para la barra de navegación
+  
+  // Barra de navegación flotante
   tabBar: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#949494',
-    paddingHorizontal: 24,
+    marginHorizontal: 24,
+    marginTop: -20,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+    overflow: 'hidden',
   },
   tab: {
     flex: 1,
@@ -375,15 +406,17 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   activeTab: {
-    borderBottomColor: '#003049',
+    borderBottomColor: '#1E40AF',
+    backgroundColor: '#F8FAFC',
   },
   tabText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#949494',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#6B7280',
   },
   activeTabText: {
-    color: '#003049',
+    color: '#1E40AF',
+    fontWeight: '700',
   },
   // Contenedor del contenido
   contentContainer: {
@@ -399,67 +432,93 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
   },
-  // Estilos para el contenido QR
-  qrContainer: {
+  // Estilos para el contenido QR (similar a scan-qr.js)
+  scannerContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 48,
   },
-  qrCode: {
-    width: 200,
-    height: 200,
-    backgroundColor: '#f2f3f7',
-    borderRadius: 15,
+  scannerFrame: {
+    width: 280,
+    height: 280,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
-    shadowColor: '#003049',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 3,
+    borderColor: '#1E40AF',
+    borderStyle: 'dashed',
   },
-  qrLabel: {
-    fontSize: 18,
+  qrIconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#F8FAFC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scannerLabel: {
+    fontSize: 20,
     fontWeight: '700',
-    color: '#003049',
+    color: '#1F2937',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  scannerSubtext: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 24,
+    maxWidth: 280,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 32,
+    width: '100%',
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E5E7EB',
+  },
+  dividerText: {
+    marginHorizontal: 20,
+    fontSize: 16,
+    color: '#9CA3AF',
+    fontWeight: '600',
   },
   codeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f2f3f7',
+    backgroundColor: '#FFFFFF',
     padding: 20,
-    borderRadius: 15,
+    borderRadius: 16,
     marginBottom: 20,
-    shadowColor: '#003049',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   codeLabel: {
     fontSize: 16,
-    color: '#949494',
+    color: '#6B7280',
     marginRight: 10,
     fontWeight: '500',
   },
   codeValue: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#003049',
-  },
-  qrInfo: {
-    marginBottom: 40,
-  },
-  qrInfoLabel: {
-    fontSize: 16,
-    color: '#949494',
-    fontWeight: '500',
+    fontWeight: '700',
+    color: '#1E40AF',
   },
   shareButton: {
     backgroundColor: '#25D366',
@@ -467,60 +526,69 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-    borderRadius: 15,
+    borderRadius: 16,
     marginBottom: 20,
     width: '100%',
     shadowColor: '#25D366',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
     elevation: 8,
   },
   shareButtonText: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
-    marginLeft: 8,
   },
   continueButton: {
-    backgroundColor: '#669BBC',
-    padding: 20,
-    borderRadius: 15,
-    width: '100%',
+    backgroundColor: '#1E40AF',
+    flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#003049',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+    justifyContent: 'center',
+    padding: 20,
+    borderRadius: 16,
+    width: '100%',
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
     elevation: 8,
   },
   continueButtonText: {
-    color: '#FDF0D5',
-    fontSize: 18,
+    color: '#FFFFFF',
+    fontSize: 16,
     fontWeight: '700',
+  },
+  buttonIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   // Estilos para el contenido de grupos
   groupsHeader: {
     padding: 24,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#949494',
+    borderBottomColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   groupsTitle: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#003049',
+    color: '#1F2937',
     marginBottom: 4,
   },
   memberCount: {
     fontSize: 16,
-    color: '#949494',
+    color: '#6B7280',
     fontWeight: '500',
   },
   membersList: {
@@ -528,20 +596,19 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   userCard: {
-    backgroundColor: '#f2f3f7',
-    borderRadius: 15,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
     padding: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    shadowColor: '#003049',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   userInfo: {
     flex: 1,
@@ -552,15 +619,20 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#669BBC',
+    backgroundColor: '#1E40AF',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
   avatarText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FDF0D5',
+    color: '#FFFFFF',
   },
   userDetails: {
     flex: 1,
@@ -573,7 +645,7 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#003049',
+    color: '#1F2937',
     marginRight: 8,
   },
   adminBadge: {
@@ -592,13 +664,13 @@ const styles = StyleSheet.create({
   },
   userEmail: {
     fontSize: 16,
-    color: '#949494',
+    color: '#6B7280',
     marginBottom: 2,
     fontWeight: '500',
   },
   joinTime: {
     fontSize: 14,
-    color: '#949494',
+    color: '#6B7280',
     fontWeight: '500',
   },
   userIndicator: {
@@ -614,13 +686,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#003049',
+    color: '#1F2937',
     marginTop: 16,
     marginBottom: 8,
   },
   emptySubtitle: {
     fontSize: 16,
-    color: '#949494',
+    color: '#6B7280',
     textAlign: 'center',
     lineHeight: 22,
     fontWeight: '500',
@@ -635,18 +707,17 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 15,
+    borderRadius: 20,
     padding: 24,
     width: '100%',
     maxWidth: 400,
-    shadowColor: '#003049',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 15,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -656,18 +727,18 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#003049',
+    color: '#1F2937',
     marginLeft: 12,
   },
   modalMessage: {
     fontSize: 16,
-    color: '#003049',
+    color: '#1F2937',
     lineHeight: 22,
     marginBottom: 8,
   },
   modalSubtext: {
     fontSize: 14,
-    color: '#949494',
+    color: '#6B7280',
     marginBottom: 24,
   },
   modalActions: {
@@ -676,24 +747,31 @@ const styles = StyleSheet.create({
   },
   modalCancelButton: {
     flex: 1,
-    backgroundColor: '#f2f3f7',
+    backgroundColor: '#F9FAFB',
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 15,
+    borderRadius: 16,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   modalCancelText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#949494',
+    color: '#6B7280',
   },
   modalConfirmButton: {
     flex: 1,
-    backgroundColor: '#C1121F',
+    backgroundColor: '#DC2626',
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 15,
+    borderRadius: 16,
     alignItems: 'center',
+    shadowColor: '#DC2626',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
   modalConfirmText: {
     fontSize: 16,
@@ -708,14 +786,13 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 400,
     maxHeight: '80%',
-    shadowColor: '#003049',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 15,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   confirmModalHeader: {
     flexDirection: 'row',
@@ -725,26 +802,28 @@ const styles = StyleSheet.create({
   confirmModalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#003049',
+    color: '#1F2937',
     marginLeft: 12,
   },
   confirmModalMessage: {
     fontSize: 16,
-    color: '#003049',
+    color: '#1F2937',
     lineHeight: 22,
     marginBottom: 20,
     textAlign: 'center',
   },
   membersPreview: {
-    backgroundColor: '#f2f3f7',
-    borderRadius: 12,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 16,
     padding: 16,
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   membersPreviewTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#003049',
+    color: '#1F2937',
     marginBottom: 12,
   },
   memberPreviewItem: {
@@ -756,15 +835,20 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#669BBC',
+    backgroundColor: '#1E40AF',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 2,
   },
   memberPreviewAvatarText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#FDF0D5',
+    color: '#FFFFFF',
   },
   memberPreviewInfo: {
     flex: 1,
@@ -772,16 +856,16 @@ const styles = StyleSheet.create({
   memberPreviewName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#003049',
+    color: '#1F2937',
     marginBottom: 2,
   },
   memberPreviewEmail: {
     fontSize: 12,
-    color: '#949494',
+    color: '#6B7280',
   },
   confirmModalSubtext: {
     fontSize: 14,
-    color: '#949494',
+    color: '#6B7280',
     marginBottom: 24,
     textAlign: 'center',
     lineHeight: 20,
@@ -792,24 +876,31 @@ const styles = StyleSheet.create({
   },
   confirmModalCancelButton: {
     flex: 1,
-    backgroundColor: '#f2f3f7',
+    backgroundColor: '#F9FAFB',
     paddingVertical: 14,
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   confirmModalCancelText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#949494',
+    color: '#6B7280',
   },
   confirmModalConfirmButton: {
     flex: 1,
     backgroundColor: '#25D366',
     paddingVertical: 14,
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: 'center',
+    shadowColor: '#25D366',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
   confirmModalConfirmText: {
     fontSize: 16,

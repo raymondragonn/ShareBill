@@ -1,5 +1,6 @@
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Platform, Dimensions } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function AdminIntegrantesPage() {
   const members = [
@@ -21,10 +22,18 @@ export default function AdminIntegrantesPage() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.qrInfo}>
-          <Text style={styles.qrLabel}>QR 1838</Text>
+      {/* Header con gradiente bancario */}
+      <LinearGradient
+        colors={['#1e3c72', '#2a5298', '#3b82f6']}
+        style={styles.headerGradient}
+      >
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Integrantes del Grupo</Text>
+          <Text style={styles.headerSubtitle}>QR 1838</Text>
         </View>
+      </LinearGradient>
+
+      <View style={styles.content}>
 
         <View style={styles.membersSection}>
           <Text style={styles.sectionTitle}>Miembros del grupo</Text>
@@ -73,39 +82,62 @@ export default function AdminIntegrantesPage() {
   );
 }
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: '#F8FAFC',
   },
+  
+  // Header con gradiente
+  headerGradient: {
+    paddingTop: Platform.OS === 'ios' ? 50 : 30,
+    paddingBottom: 30,
+  },
+  header: {
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontWeight: '500',
+  },
+  
   content: {
     flex: 1,
-    padding: 20,
-  },
-  qrInfo: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  qrLabel: {
-    fontSize: 25,
-    color: '#8E8E93',
+    padding: 24,
   },
   membersSection: {
-    backgroundColor: '#333333',
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 20,
+    backgroundColor: '#FFFFFF',
+    padding: 24,
+    borderRadius: 16,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#F8F8F8',
-    marginBottom: 5,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 8,
   },
   memberCount: {
-    fontSize: 14,
-    color: '#F8F8F8',
-    opacity: 0.8,
+    fontSize: 16,
+    color: '#6B7280',
+    fontWeight: '500',
   },
   membersList: {
     flex: 1,
@@ -119,19 +151,18 @@ const styles = StyleSheet.create({
   },
   memberCard: {
     width: '48%',
-    backgroundColor: '#C2A2DA',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 16,
+    padding: 20,
     marginBottom: 16,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   memberAvatar: {
     width: 60,
@@ -157,7 +188,7 @@ const styles = StyleSheet.create({
   memberName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#F5F5F5',
+    color: '#1F2937',
     marginBottom: 6,
     textAlign: 'center',
   },
@@ -173,22 +204,21 @@ const styles = StyleSheet.create({
   },
   memberStatus: {
     fontSize: 12,
-    color: '#363636',
+    color: '#6B7280',
     fontWeight: '500',
   },
   summary: {
     backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 20,
+    padding: 24,
+    borderRadius: 16,
+    marginBottom: 24,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   summaryRow: {
     flexDirection: 'row',
@@ -198,22 +228,28 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 16,
-    color: '#333333',
+    color: '#6B7280',
+    fontWeight: '500',
   },
   summaryValue: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1C1C1E',
+    fontWeight: '700',
+    color: '#1F2937',
   },
   continueButton: {
-    backgroundColor: '#8A2BE2',
-    padding: 16,
-    borderRadius: 12,
+    backgroundColor: '#1E40AF',
+    padding: 20,
+    borderRadius: 16,
     alignItems: 'center',
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
   },
   continueButtonText: {
-    color: '#F8F8F8',
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
 });

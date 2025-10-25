@@ -1,13 +1,10 @@
-import { StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Alert, Platform, Dimensions } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function ScanQRPage() {
   const router = useRouter();
-
-  const handleBack = () => {
-    router.back();
-  };
 
   const handleScan = () => {
     Alert.alert('Escanear', 'Funcionalidad de escaneo de QR en desarrollo');
@@ -19,18 +16,22 @@ export default function ScanQRPage() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Unirse a Grupo</Text>
-        <View style={styles.placeholder} />
-      </View>
+      {/* Header con gradiente bancario */}
+      <LinearGradient
+        colors={['#1e3c72', '#2a5298', '#3b82f6']}
+        style={styles.headerGradient}
+      >
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Unirse a Grupo</Text>
+        </View>
+      </LinearGradient>
 
       <View style={styles.content}>
         <View style={styles.scannerContainer}>
           <View style={styles.scannerFrame}>
-            <Ionicons name="qr-code-outline" size={120} color="#1C1C1E" />
+            <View style={styles.qrIconContainer}>
+              <Ionicons name="qr-code" size={80} color="#1E40AF" />
+            </View>
           </View>
           <Text style={styles.scannerLabel}>Escanea el código QR del grupo</Text>
           <Text style={styles.scannerSubtext}>
@@ -45,12 +46,16 @@ export default function ScanQRPage() {
         </View>
 
         <TouchableOpacity style={styles.manualButton} onPress={handleManualCode}>
-          <Ionicons name="keypad" size={24} color="#007AFF" />
+          <View style={styles.buttonIconContainer}>
+            <Ionicons name="keypad" size={20} color="#1E40AF" />
+          </View>
           <Text style={styles.manualButtonText}>Ingresar código manualmente</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.scanButton} onPress={handleScan}>
-          <Ionicons name="camera" size={24} color="#FFFFFF" />
+          <View style={styles.buttonIconContainer}>
+            <Ionicons name="camera" size={20} color="#FFFFFF" />
+          </View>
           <Text style={styles.scanButtonText}>ESCANEAR CÓDIGO QR</Text>
         </TouchableOpacity>
       </View>
@@ -58,126 +63,145 @@ export default function ScanQRPage() {
   );
 }
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#F8FAFC',
+  },
+  
+  // Header con gradiente
+  headerGradient: {
+    paddingTop: Platform.OS === 'ios' ? 50 : 30,
+    paddingBottom: 20,
   },
   header: {
-    backgroundColor: '#007AFF',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 20,
-    paddingTop: 50,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 24,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 28,
+    fontWeight: '700',
     color: '#FFFFFF',
   },
-  placeholder: {
-    width: 40,
-  },
+  
+  // Contenido
   content: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    padding: 24,
   },
   scannerContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 48,
   },
   scannerFrame: {
-    width: 250,
-    height: 250,
+    width: 280,
+    height: 280,
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 8,
-    borderWidth: 2,
-    borderColor: '#007AFF',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 3,
+    borderColor: '#1E40AF',
     borderStyle: 'dashed',
   },
+  qrIconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#F8FAFC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   scannerLabel: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1C1C1E',
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1F2937',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   scannerSubtext: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: 16,
+    color: '#6B7280',
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 24,
+    maxWidth: 280,
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 30,
+    marginVertical: 32,
     width: '100%',
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E5E5EA',
+    backgroundColor: '#E5E7EB',
   },
   dividerText: {
-    marginHorizontal: 16,
-    fontSize: 14,
-    color: '#8E8E93',
-    fontWeight: '500',
+    marginHorizontal: 20,
+    fontSize: 16,
+    color: '#9CA3AF',
+    fontWeight: '600',
   },
   manualButton: {
     backgroundColor: '#FFFFFF',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
-    borderRadius: 12,
+    padding: 20,
+    borderRadius: 16,
     marginBottom: 20,
     width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: '#E5E7EB',
+  },
+  buttonIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F8FAFC',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   manualButtonText: {
-    color: '#007AFF',
+    color: '#1E40AF',
     fontSize: 16,
     fontWeight: '600',
-    marginLeft: 8,
   },
   scanButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#1E40AF',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
-    borderRadius: 12,
+    padding: 20,
+    borderRadius: 16,
     width: '100%',
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
   },
   scanButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 8,
+    fontWeight: '700',
   },
 });

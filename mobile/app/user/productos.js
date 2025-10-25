@@ -1,7 +1,8 @@
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Animated } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Animated, Platform, Dimensions } from "react-native";
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { useState, useRef } from "react";
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import LoadingPayment from '../components/LoadingPayment';
 
 export default function ProductosPage() {
@@ -203,15 +204,21 @@ export default function ProductosPage() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Productos</Text>
-        <Text style={styles.subtitle}>
-          {activeTab === 'PRODUCTOS' 
-            ? 'Selecciona los productos que te corresponden' 
-            : 'Revisa los productos seleccionados'
-          }
-        </Text>
-      </View>
+      {/* Header con gradiente bancario */}
+      <LinearGradient
+        colors={['#1e3c72', '#2a5298', '#3b82f6']}
+        style={styles.headerGradient}
+      >
+        <View style={styles.header}>
+          <Text style={styles.title}>Productos</Text>
+          <Text style={styles.subtitle}>
+            {activeTab === 'PRODUCTOS' 
+              ? 'Selecciona los productos que te corresponden' 
+              : 'Revisa los productos seleccionados'
+            }
+          </Text>
+        </View>
+      </LinearGradient>
 
       {/* Barra de navegación con pestañas */}
       <View style={styles.tabBar}>
@@ -246,52 +253,68 @@ export default function ProductosPage() {
   );
 }
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#F8FAFC',
+  },
+  
+  // Header con gradiente
+  headerGradient: {
+    paddingTop: Platform.OS === 'ios' ? 50 : 30,
+    paddingBottom: 30,
   },
   header: {
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    paddingHorizontal: 24,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
-    marginBottom: 5,
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#8E8E93',
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontWeight: '500',
   },
   // Estilos para la barra de navegación
   tabBar: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
-    paddingHorizontal: 20,
+    marginHorizontal: 24,
+    marginTop: -20,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+    overflow: 'hidden',
   },
   tab: {
     flex: 1,
-    paddingVertical: 16,
+    paddingVertical: 20,
     alignItems: 'center',
     borderBottomWidth: 3,
     borderBottomColor: 'transparent',
   },
   activeTab: {
-    borderBottomColor: '#007AFF',
+    borderBottomColor: '#1E40AF',
+    backgroundColor: '#F8FAFC',
   },
   tabText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#8E8E93',
+    color: '#6B7280',
   },
   activeTabText: {
-    color: '#007AFF',
+    color: '#1E40AF',
+    fontWeight: '700',
   },
   // Contenedor del contenido
   contentContainer: {

@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View, TouchableOpacity, Image, Alert, ActivityIndicator, Platform } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Image, Alert, ActivityIndicator, Platform, Dimensions } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // Configuración de API según la plataforma
 const getApiUrl = () => {
@@ -226,13 +227,15 @@ export default function EscanearTicketPage() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Escanear Ticket</Text>
-        <View style={styles.placeholder} />
-      </View>
+      {/* Header con gradiente bancario */}
+      <LinearGradient
+        colors={['#1e3c72', '#2a5298', '#3b82f6']}
+        style={styles.headerGradient}
+      >
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Escanear Ticket</Text>
+        </View>
+      </LinearGradient>
 
       <View style={styles.content}>
         <View style={styles.imageContainer}>
@@ -316,54 +319,47 @@ export default function EscanearTicketPage() {
   );
 }
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#F8FAFC',
+  },
+  
+  // Header con gradiente
+  headerGradient: {
+    paddingTop: Platform.OS === 'ios' ? 50 : 30,
+    paddingBottom: 20,
   },
   header: {
-    backgroundColor: '#007AFF',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 20,
-    paddingTop: 50,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 24,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 28,
+    fontWeight: '700',
     color: '#FFFFFF',
-  },
-  placeholder: {
-    width: 40,
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: 24,
   },
   imageContainer: {
     width: '100%',
     height: 300,
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    marginBottom: 20,
+    borderRadius: 20,
+    marginBottom: 24,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 10,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   imageWrapper: {
     flex: 1,
@@ -393,53 +389,59 @@ const styles = StyleSheet.create({
   },
   instructionText: {
     fontSize: 16,
-    color: '#8E8E93',
+    color: '#6B7280',
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: 32,
+    fontWeight: '500',
   },
   buttonGroup: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 30,
+    marginBottom: 32,
     gap: 16,
   },
   actionButton: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderRadius: 12,
+    padding: 24,
+    borderRadius: 16,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   actionButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#007AFF',
-    marginTop: 8,
+    color: '#1E40AF',
+    marginTop: 12,
   },
   scanButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#1E40AF',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 18,
-    borderRadius: 12,
-    gap: 10,
+    padding: 20,
+    borderRadius: 16,
+    gap: 12,
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
   },
   scanButtonDisabled: {
-    backgroundColor: '#C7C7CC',
+    backgroundColor: '#9CA3AF',
+    shadowOpacity: 0.1,
   },
   scanButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   loadingOverlay: {
     position: 'absolute',
@@ -454,28 +456,28 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     backgroundColor: '#FFFFFF',
-    padding: 30,
-    borderRadius: 16,
+    padding: 32,
+    borderRadius: 20,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 10,
+    shadowRadius: 20,
+    elevation: 15,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   loadingText: {
-    marginTop: 16,
+    marginTop: 20,
     fontSize: 18,
-    fontWeight: '600',
-    color: '#1C1C1E',
+    fontWeight: '700',
+    color: '#1F2937',
   },
   loadingSubtext: {
     marginTop: 8,
     fontSize: 14,
-    color: '#8E8E93',
+    color: '#6B7280',
     textAlign: 'center',
+    fontWeight: '500',
   },
 });

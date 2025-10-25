@@ -47,25 +47,31 @@ export default function TabLayout() {
         return null;
     }
 
+    // Ocultar la barra de tabs en pantallas de autenticación
+    const inAuthGroup = segments[0] === 'auth';
+    
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <Tabs
                 screenOptions={{
-                    tabBarActiveTintColor: '#8e09d5',
-                    tabBarInactiveTintColor: '#8E8E93',
+                    tabBarActiveTintColor: '#1E40AF',
+                    tabBarInactiveTintColor: '#6B7280',
                     tabBarShowLabel: false,
-                    tabBarStyle: {
+                    tabBarStyle: inAuthGroup ? { display: 'none' } : {
                         backgroundColor: '#FFFFFF',
                         borderTopWidth: 1,
-                        borderTopColor: '#E5E5EA',
+                        borderTopColor: '#E5E7EB',
                         paddingBottom: 15,
                         paddingTop: 10,
                         height: 80,
                         marginBottom: 10,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: -2 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 8,
+                        elevation: 8,
                     },
-                    headerStyle: { backgroundColor: '#8e09d5' },
-                    headerTintColor: '#FFFFFF',
-                    headerTitleStyle: { fontWeight: 'bold' },
+                    headerShown: false,
                 }}
                 initialRouteName="home"
             >
@@ -97,6 +103,14 @@ export default function TabLayout() {
                     }}
                 />
                 <Tabs.Screen
+                    name="wallet"
+                    options={{
+                        tabBarIcon: ({ color, size }) => (
+                            <Ionicons name="wallet" size={size + 4} color={color} />
+                        ),
+                    }}
+                />
+                <Tabs.Screen
                     name="profile"
                     options={{
                         tabBarIcon: ({ color, size }) => (
@@ -104,7 +118,6 @@ export default function TabLayout() {
                         ),
                     }}
                 />
-                <Tabs.Screen name="pago-completado" options={{ href: null }} />
                 <Tabs.Screen name="auth/login" options={{ href: null }} />
                 <Tabs.Screen name="auth/register" options={{ href: null }} />
                 <Tabs.Screen name="user/productos" options={{ href: null }} />
@@ -112,6 +125,8 @@ export default function TabLayout() {
                 <Tabs.Screen name="admin/pago" options={{ href: null }} />
                 <Tabs.Screen name="admin/integrantes" options={{ href: null }} />
                 <Tabs.Screen name="admin/escanear-ticket" options={{ href: null }} />
+                <Tabs.Screen name="pago-completado" options={{ href: null }} />
+                <Tabs.Screen name="components/LoadingPayment" options={{ href: null }} />
             </Tabs>
         </GestureHandlerRootView>
     );

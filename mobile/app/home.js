@@ -1,34 +1,55 @@
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Platform, Dimensions } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Platform, Dimensions, Alert } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Link } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useState, useEffect } from 'react';
 
 export default function HomePage() {
-  const user = { name: 'Pedro' };
+  const [user, setUser] = useState(null);
   const router = useRouter();
+
+  useEffect(() => {
+    loadUser();
+  }, []);
+
+  const loadUser = async () => {
+    try {
+      const userData = await AsyncStorage.getItem("user");
+      if (userData) {
+        setUser(JSON.parse(userData));
+      }
+    } catch (error) {
+      console.error("Error al cargar usuario:", error);
+    }
+  };
 
   const handleCreateGroup = async () => {
     try {
-      // Cambia la URL por la de tu backend
-      const response = await fetch('http://localhost:8000/group', {
+      const response = await fetch('http://localhost:8000/groups/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: 'Nuevo grupo', // Puedes personalizar el nombre
-          members: [user.name], // Ejemplo: solo el usuario actual
+          name: 'Nuevo grupo',
         }),
       });
+
       if (response.ok) {
-        // Navega a la pantalla de QR
+        const groupData = await response.json();
+        // Guardar los datos del grupo para mostrarlos en la pantalla de QR
+        await AsyncStorage.setItem('currentGroup', JSON.stringify(groupData));
+        // Navegar a la pantalla de QR
         router.push('/admin/qr');
       } else {
-        alert('Error al crear el grupo');
+        const error = await response.json();
+        Alert.alert('Error', error.detail || 'Error al crear el grupo');
       }
     } catch (error) {
-      alert('Error de red al crear el grupo');
+      console.error('Error al crear grupo:', error);
+      Alert.alert('Error', 'No se pudo conectar con el servidor');
     }
   };
 
@@ -40,23 +61,21 @@ export default function HomePage() {
         style={styles.headerGradient}
       >
         <View style={styles.header}>
-          <Text style={styles.greeting}>Hola, {user.name}</Text>
+          <Text style={styles.greeting}>Hola, {user ? user.nombre : 'Usuario'}</Text>
           <Text style={styles.subtitle}>Gestiona tus grupos y gastos compartidos</Text>
         </View>
       </LinearGradient>
 
       <View style={styles.actionsContainer}>
-        <Link href="/admin/qr" asChild>
-          <TouchableOpacity style={styles.actionButton}>
-            <View style={styles.actionIconContainer}>
-              <Ionicons name="add-circle" size={28} color="#1E40AF" />
-            </View>
-            <View style={styles.actionContent}>
-              <Text style={styles.actionButtonText}>Nuevo grupo</Text>
-              <Text style={styles.actionButtonSubtext}>Crear un nuevo grupo</Text>
-            </View>
-          </TouchableOpacity>
-        </Link>
+        <TouchableOpacity style={styles.actionButton} onPress={handleCreateGroup}>
+          <View style={styles.actionIconContainer}>
+            <Ionicons name="add-circle" size={28} color="#1E40AF" />
+          </View>
+          <View style={styles.actionContent}>
+            <Text style={styles.actionButtonText}>Nuevo grupo</Text>
+            <Text style={styles.actionButtonSubtext}>Crear un nuevo grupo</Text>
+          </View>
+        </TouchableOpacity>
         
         <Link href="/scan-qr" asChild>
           <TouchableOpacity style={styles.actionButtonSecondary}>

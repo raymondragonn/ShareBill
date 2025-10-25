@@ -21,6 +21,7 @@ class ArticuloResponse(ArticuloBase):
 
 class TicketBase(BaseModel):
     nombre_negocio: Optional[str] = None
+    total: Optional[float] = None
 
 class TicketCreate(TicketBase):
     pass
@@ -37,5 +38,6 @@ class TicketResponse(TicketBase):
 class TicketProcessResponse(BaseModel):
     ticket_id: int
     nombre_negocio: Optional[str] = None
+    total: Optional[float] = None
     articulos: List[ArticuloBase]
     mensaje: str

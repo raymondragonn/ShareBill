@@ -54,7 +54,8 @@ async def procesar_ticket(
         
         # Crear el ticket en la base de datos
         nuevo_ticket = Ticket(
-            nombre_negocio=datos_extraidos.get("nombre_negocio")
+            nombre_negocio=datos_extraidos.get("nombre_negocio"),
+            total=datos_extraidos.get("total")
         )
         db.add(nuevo_ticket)
         db.commit()
@@ -78,6 +79,7 @@ async def procesar_ticket(
         return TicketProcessResponse(
             ticket_id=nuevo_ticket.id,
             nombre_negocio=nuevo_ticket.nombre_negocio,
+            total=nuevo_ticket.total,
             articulos=articulos_creados,
             mensaje="Ticket procesado exitosamente"
         )

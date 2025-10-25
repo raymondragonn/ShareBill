@@ -25,7 +25,7 @@ class GeminiService:
             
             # Prompt especializado para extracción de tickets
             prompt = """
-                **ROL:** Eres un especialista en procesamiento de visión y extracción de datos. Tu única tarea es analizar la imagen de ticket de compra proporcionada, extraer los detalles de cada producto individual y el nombre del negocio, y devolver el resultado en un formato JSON estricto.
+                **ROL:** Eres un especialista en procesamiento de visión y extracción de datos. Tu única tarea es analizar la imagen de ticket de compra proporcionada, extraer los detalles de cada producto individual, el nombre del negocio y el total de la cuenta, y devolver el resultado en un formato JSON estricto.
 
                 **TAREA Y REGLAS DE EXTRACCIÓN:**
 
@@ -41,10 +41,15 @@ class GeminiService:
                         * `precio_unitario`: Precio por unidad (número flotante).
                         * `monto_linea`: Monto total de esa línea (Precio unitario * Cantidad) (número flotante).
 
-                3.  **Exclusión de Datos:**
-                    * **Ignora y no incluyas** campos como Fecha, Hora, Subtotal, Impuestos (IVA) o Total Final en la salida.
+                3.  **Total de la Cuenta:**
+                    * Extrae el monto total final de la compra que aparece en el ticket.
+                    * Campo: `total` (número flotante)
+                    * Busca etiquetas como: "TOTAL", "Total a Pagar", "Total General", etc.
 
-                4.  **Manejo de Errores:**
+                4.  **Exclusión de Datos:**
+                    * **Ignora y no incluyas** campos como Fecha, Hora, Subtotal, Impuestos (IVA) por separado.
+
+                5.  **Manejo de Errores:**
                     * Si algún campo no puede ser identificado, utiliza `null` para el valor.
                     * **NO** incluyas ninguna explicación, texto introductorio, ni comentarios fuera del bloque JSON.
 
@@ -54,6 +59,7 @@ class GeminiService:
 
                 {
                 "nombre_negocio": "string o null",
+                "total": 0.0,
                 "articulos": [
                     {
                     "descripcion": "string",

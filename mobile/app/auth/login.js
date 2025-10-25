@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, Platform, Dimensions } from "react-native";
 import { useState } from "react";
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -68,10 +69,16 @@ export default function LoginPage() {
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>ShareBill</Text>
-                <Text style={styles.subtitle}>Comparte gastos fácilmente</Text>
-            </View>
+            {/* Header con gradiente bancario */}
+            <LinearGradient
+                colors={['#1e3c72', '#2a5298', '#3b82f6']}
+                style={styles.headerGradient}
+            >
+                <View style={styles.header}>
+                    <Text style={styles.title}>ShareBill</Text>
+                    <Text style={styles.subtitle}>Comparte gastos fácilmente</Text>
+                </View>
+            </LinearGradient>
 
             <View style={styles.form}>
                 <Text style={styles.formTitle}>Iniciar Sesión</Text>
@@ -123,35 +130,51 @@ export default function LoginPage() {
     );
 }
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDF0D5',
+    backgroundColor: '#F8FAFC',
+  },
+  
+  // Header con gradiente
+  headerGradient: {
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 60,
   },
   header: {
     alignItems: 'center',
-    paddingTop: 100,
-    paddingBottom: 50,
+    paddingHorizontal: 24,
   },
   title: {
     fontSize: 36,
-    fontWeight: 'bold',
-    color: '#003049',
+    fontWeight: '700',
+    color: '#FFFFFF',
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 18,
-    color: '#669BBC',
+    color: 'rgba(255, 255, 255, 0.9)',
     fontWeight: '500',
   },
   form: {
     flex: 1,
     padding: 24,
+    marginTop: -30,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
   },
   formTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#003049',
+    color: '#1F2937',
     marginBottom: 40,
     textAlign: 'center',
   },
@@ -159,57 +182,54 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   label: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#003049',
+    color: '#374151',
     marginBottom: 12,
   },
   input: {
-    backgroundColor: '#FDF0D5',
-    borderWidth: 3,
-    borderColor: '#669BBC',
-    borderRadius: 20,
+    backgroundColor: '#F9FAFB',
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+    borderRadius: 16,
     padding: 20,
-    fontSize: 18,
-    color: '#003049',
+    fontSize: 16,
+    color: '#1F2937',
     fontWeight: '500',
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FDF0D5',
-    borderWidth: 3,
-    borderColor: '#669BBC',
-    borderRadius: 20,
+    backgroundColor: '#F9FAFB',
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+    borderRadius: 16,
   },
   passwordInput: {
     flex: 1,
     padding: 20,
-    fontSize: 18,
-    color: '#003049',
+    fontSize: 16,
+    color: '#1F2937',
     fontWeight: '500',
   },
   eyeButton: {
     padding: 20,
   },
   loginButton: {
-    backgroundColor: '#C1121F',
+    backgroundColor: '#1E40AF',
     padding: 20,
-    borderRadius: 28,
+    borderRadius: 16,
     alignItems: 'center',
     marginTop: 30,
-    shadowColor: '#780000',
-    shadowOffset: {
-      width: 0,
-      height: 6,
-    },
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 10,
+    shadowRadius: 12,
+    elevation: 8,
   },
   loginButtonText: {
-    color: '#FDF0D5',
-    fontSize: 20,
+    color: '#FFFFFF',
+    fontSize: 18,
     fontWeight: '700',
   },
   registerLink: {
@@ -217,8 +237,8 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   registerText: {
-    color: '#003049',
-    fontSize: 18,
-    fontWeight: '600',
+    color: '#6B7280',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });

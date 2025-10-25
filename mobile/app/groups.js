@@ -1,5 +1,6 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Platform, Dimensions } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function GroupsPage() {
   // Datos de ejemplo de usuarios que se han unido al grupo
@@ -88,16 +89,22 @@ export default function GroupsPage() {
   );
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerInfo}>
-          <Text style={styles.title}>Integrantes del Grupo</Text>
-          <Text style={styles.memberCount}>{groupMembers.length} miembros</Text>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Header con gradiente bancario */}
+      <LinearGradient
+        colors={['#1e3c72', '#2a5298', '#3b82f6']}
+        style={styles.headerGradient}
+      >
+        <View style={styles.header}>
+          <View style={styles.headerInfo}>
+            <Text style={styles.title}>Integrantes del Grupo</Text>
+            <Text style={styles.memberCount}>{groupMembers.length} miembros</Text>
+          </View>
+          <TouchableOpacity style={styles.settingsButton}>
+            <Ionicons name="settings" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.settingsButton}>
-          <Ionicons name="settings-outline" size={24} color="#007AFF" />
-        </TouchableOpacity>
-      </View>
+      </LinearGradient>
 
       <View style={styles.content}>
         {groupMembers.length > 0 ? (
@@ -118,72 +125,70 @@ export default function GroupsPage() {
   );
 }
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#F8FAFC',
+  },
+  
+  // Header con gradiente
+  headerGradient: {
+    paddingTop: Platform.OS === 'ios' ? 50 : 30,
+    paddingBottom: 30,
   },
   header: {
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    paddingTop: 16,
+    paddingHorizontal: 24,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
   headerInfo: {
     flex: 1,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
-    marginBottom: 4,
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 8,
   },
   memberCount: {
     fontSize: 16,
-    color: '#8E8E93',
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontWeight: '500',
   },
   settingsButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F2F2F7',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  
+  // Contenido
   content: {
     flex: 1,
-    padding: 16,
+    padding: 24,
   },
   membersList: {
-    gap: 12,
+    gap: 16,
   },
   userCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 16,
+    padding: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   userInfo: {
     flex: 1,
@@ -191,16 +196,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatarContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#007AFF',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#1E40AF',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: 16,
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   avatarText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
@@ -210,66 +220,70 @@ const styles = StyleSheet.create({
   nameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   userName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
-    color: '#1C1C1E',
-    marginRight: 8,
+    color: '#1F2937',
+    marginRight: 12,
   },
   adminBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF3CD',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   adminText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#856404',
+    color: '#D97706',
     marginLeft: 4,
   },
   userEmail: {
     fontSize: 14,
-    color: '#8E8E93',
-    marginBottom: 2,
+    color: '#6B7280',
+    marginBottom: 4,
   },
   joinTime: {
     fontSize: 12,
-    color: '#8E8E93',
+    color: '#9CA3AF',
+    fontWeight: '500',
   },
   userActions: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 12,
   },
   actionButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#F2F2F7',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F8FAFC',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   emptyState: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: 80,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#1C1C1E',
-    marginTop: 16,
-    marginBottom: 8,
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginTop: 24,
+    marginBottom: 12,
   },
   emptySubtitle: {
     fontSize: 16,
-    color: '#8E8E93',
+    color: '#6B7280',
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 24,
+    maxWidth: 280,
   },
 });

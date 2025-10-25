@@ -1,7 +1,8 @@
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Platform, Dimensions } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Link } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function HomePage() {
   const user = { name: 'Pedro' };
@@ -32,182 +33,280 @@ export default function HomePage() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.greeting}>Hola, {user.name}</Text>
-      </View>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Header con gradiente bancario */}
+      <LinearGradient
+        colors={['#1e3c72', '#2a5298', '#3b82f6']}
+        style={styles.headerGradient}
+      >
+        <View style={styles.header}>
+          <Text style={styles.greeting}>Hola, {user.name}</Text>
+          <Text style={styles.subtitle}>Gestiona tus grupos y gastos compartidos</Text>
+        </View>
+      </LinearGradient>
 
       <View style={styles.actionsContainer}>
-        <TouchableOpacity style={styles.actionButton} onPress={handleCreateGroup}>
-          <Ionicons name="add-circle" size={36} color="#000000" />
-          <Text style={styles.actionButtonText}>Nuevo grupo</Text>
-        </TouchableOpacity>
+        <Link href="/admin/qr" asChild>
+          <TouchableOpacity style={styles.actionButton}>
+            <View style={styles.actionIconContainer}>
+              <Ionicons name="add-circle" size={28} color="#1E40AF" />
+            </View>
+            <View style={styles.actionContent}>
+              <Text style={styles.actionButtonText}>Nuevo grupo</Text>
+              <Text style={styles.actionButtonSubtext}>Crear un nuevo grupo</Text>
+            </View>
+          </TouchableOpacity>
+        </Link>
         
         <Link href="/scan-qr" asChild>
           <TouchableOpacity style={styles.actionButtonSecondary}>
-            <Ionicons name="qr-code" size={36} color="#007AFF" />
-            <Text style={styles.actionButtonTextSecondary}>Unirme a grupo</Text>
+            <View style={styles.actionIconContainer}>
+              <Ionicons name="qr-code" size={28} color="#059669" />
+            </View>
+            <View style={styles.actionContent}>
+              <Text style={styles.actionButtonTextSecondary}>Unirme a grupo</Text>
+              <Text style={styles.actionButtonSubtextSecondary}>Escanear código QR</Text>
+            </View>
           </TouchableOpacity>
         </Link>
       </View>
 
       {/* ...existing code... */}
       <View style={styles.recentGroups}>
-        {/* ...existing code... */}
+        <Text style={styles.sectionTitle}>Grupos recientes</Text>
+        
+        <View style={styles.groupsList}>
+          <View style={styles.groupCard}>
+            <View style={styles.groupIcon}>
+              <Ionicons name="restaurant" size={20} color="#EF4444" />
+            </View>
+            <View style={styles.groupInfo}>
+              <Text style={styles.groupName}>Cena familiar</Text>
+              <Text style={styles.groupDate}>Hace 2 horas</Text>
+            </View>
+            <View style={styles.groupStats}>
+              <Text style={styles.groupAmount}>$45.50</Text>
+              <Text style={styles.groupMembers}>3 miembros</Text>
+            </View>
+          </View>
+
+          <View style={styles.groupCard}>
+            <View style={styles.groupIcon}>
+              <Ionicons name="car" size={20} color="#3B82F6" />
+            </View>
+            <View style={styles.groupInfo}>
+              <Text style={styles.groupName}>Gasolina</Text>
+              <Text style={styles.groupDate}>Ayer</Text>
+            </View>
+            <View style={styles.groupStats}>
+              <Text style={styles.groupAmount}>$30.00</Text>
+              <Text style={styles.groupMembers}>2 miembros</Text>
+            </View>
+          </View>
+
+          <View style={styles.groupCard}>
+            <View style={styles.groupIcon}>
+              <Ionicons name="gift" size={20} color="#10B981" />
+            </View>
+            <View style={styles.groupInfo}>
+              <Text style={styles.groupName}>Cumpleaños Ana</Text>
+              <Text style={styles.groupDate}>Hace 3 días</Text>
+            </View>
+            <View style={styles.groupStats}>
+              <Text style={styles.groupAmount}>$120.75</Text>
+              <Text style={styles.groupMembers}>5 miembros</Text>
+            </View>
+          </View>
+
+          <View style={styles.groupCard}>
+            <View style={styles.groupIcon}>
+              <Ionicons name="airplane" size={20} color="#F59E0B" />
+            </View>
+            <View style={styles.groupInfo}>
+              <Text style={styles.groupName}>Viaje a la playa</Text>
+              <Text style={styles.groupDate}>Hace 1 semana</Text>
+            </View>
+            <View style={styles.groupStats}>
+              <Text style={styles.groupAmount}>$85.30</Text>
+              <Text style={styles.groupMembers}>4 miembros</Text>
+            </View>
+          </View>
+
+          <View style={styles.groupCard}>
+            <View style={styles.groupIcon}>
+              <Ionicons name="briefcase" size={20} color="#8B5CF6" />
+            </View>
+            <View style={styles.groupInfo}>
+              <Text style={styles.groupName}>Cena de trabajo</Text>
+              <Text style={styles.groupDate}>Hace 2 semanas</Text>
+            </View>
+            <View style={styles.groupStats}>
+              <Text style={styles.groupAmount}>$65.50</Text>
+              <Text style={styles.groupMembers}>3 miembros</Text>
+            </View>
+          </View>
+        </View>
       </View>
     </ScrollView>
   );
 }
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8FAFC',
+  },
+  
+  // Header con gradiente
+  headerGradient: {
+    paddingTop: Platform.OS === 'ios' ? 50 : 30,
+    paddingBottom: 30,
   },
   header: {
-    backgroundColor: '#FFFFFF',
-    padding: 24,
-    paddingTop: 16,
-    paddingBottom: 0,
+    paddingHorizontal: 24,
   },
   greeting: {
-    fontSize: 25,
-    fontWeight: 'bold',
-    color: '#003049',
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 8,
   },
+  subtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontWeight: '500',
+  },
+
+  // Acciones principales
   actionsContainer: {
     padding: 24,
-    flexDirection: 'row',
     gap: 16,
   },
   actionButton: {
-    backgroundColor: '#f2f3f7',
+    backgroundColor: '#FFFFFF',
     flexDirection: 'row',
     alignItems: 'center',
+    padding: 20,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  actionButtonSecondary: {
+    backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 20,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  actionIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F8FAFC',
+    alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
-    borderRadius: 15,
-    color: '#003049',
+    marginRight: 16,
+  },
+  actionContent: {
     flex: 1,
   },
   actionButtonText: {
-    color: '#000000',
-    fontSize: 20,
-    fontWeight: '700',
-    marginLeft: 16,
-  },
-  actionButtonSecondary: {
-    backgroundColor: '#f2f3f7',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-    borderRadius: 15,
-    flex: 1,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 4,
   },
   actionButtonTextSecondary: {
-    color: '#003049',
-    fontSize: 20,
-    fontWeight: '700',
-    marginLeft: 16,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 4,
   },
-  actionButtonTertiary: {
-    backgroundColor: '#669BBC',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-    borderRadius: 15,
-    shadowColor: '#003049',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
+  actionButtonSubtext: {
+    fontSize: 14,
+    color: '#6B7280',
   },
-  actionButtonTextTertiary: {
-    color: '#FDF0D5',
-    fontSize: 20,
-    fontWeight: '700',
-    marginLeft: 16,
+  actionButtonSubtextSecondary: {
+    fontSize: 14,
+    color: '#6B7280',
   },
+
+  // Grupos recientes
   recentGroups: {
-    padding: 24,
-    paddingTop: 0,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#949494',
-    marginBottom: 24,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
   },
   sectionTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '700',
-    color: '#003049',
-    marginBottom: 20,
+    color: '#1F2937',
+    marginBottom: 16,
+  },
+  groupsList: {
+    gap: 12,
   },
   groupCard: {
-    backgroundColor: '#f2f3f7',
+    backgroundColor: '#FFFFFF',
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 16,
+    padding: 16,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+  },
+  groupIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   groupInfo: {
     flex: 1,
   },
   groupName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#003049',
-    marginBottom: 6,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 4,
   },
   groupDate: {
-    fontSize: 16,
-    color: '#949494',
-    fontWeight: '500',
+    fontSize: 14,
+    color: '#6B7280',
   },
   groupStats: {
     alignItems: 'flex-end',
   },
   groupAmount: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#000000',
-    marginBottom: 6,
+    color: '#1F2937',
+    marginBottom: 4,
   },
   groupMembers: {
-    fontSize: 14,
-    color: '#949494',
+    fontSize: 12,
+    color: '#6B7280',
     fontWeight: '500',
-  },
-  quickStats: {
-    flexDirection: 'row',
-    padding: 24,
-    gap: 20,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: '#FDF0D5',
-    padding: 24,
-    borderRadius: 15,
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#C1121F',
-    marginTop: 12,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: '#669BBC',
-    marginTop: 8,
-    textAlign: 'center',
-    fontWeight: '600',
   },
 });

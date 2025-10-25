@@ -1,7 +1,8 @@
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ScrollView } from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ScrollView, Platform, Dimensions } from "react-native";
 import { useState } from "react";
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -257,32 +258,70 @@ export default function RegisterPage() {
 
     return (
         <ScrollView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>ShareBill</Text>
-                <Text style={styles.subtitle}>Comparte gastos fácilmente</Text>
-            </View>
+            {/* Header con gradiente bancario */}
+            <LinearGradient
+                colors={['#1e3c72', '#2a5298', '#3b82f6']}
+                style={styles.headerGradient}
+            >
+                <View style={styles.header}>
+                    <Text style={styles.title}>ShareBill</Text>
+                    <Text style={styles.subtitle}>Comparte gastos fácilmente</Text>
+                </View>
+            </LinearGradient>
 
             {step === 1 ? renderStep1() : renderStep2()}
         </ScrollView>
     );
 }
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#FDF0D5" },
-    header: { alignItems: "center", paddingTop: 80, paddingBottom: 40 },
-    title: { fontSize: 36, fontWeight: "bold", color: "#003049", marginBottom: 12 },
-    subtitle: { fontSize: 18, color: "#669BBC", fontWeight: "500" },
-    form: { flex: 1, padding: 24 },
+    container: { flex: 1, backgroundColor: "#F8FAFC" },
+    
+    // Header con gradiente
+    headerGradient: {
+        paddingTop: Platform.OS === 'ios' ? 60 : 40,
+        paddingBottom: 60,
+    },
+    header: { 
+        alignItems: "center", 
+        paddingHorizontal: 24,
+    },
+    title: { 
+        fontSize: 36, 
+        fontWeight: "700", 
+        color: "#FFFFFF", 
+        marginBottom: 12 
+    },
+    subtitle: { 
+        fontSize: 18, 
+        color: "rgba(255, 255, 255, 0.9)", 
+        fontWeight: "500" 
+    },
+    form: { 
+        flex: 1, 
+        padding: 24,
+        marginTop: -30,
+        backgroundColor: '#FFFFFF',
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 20,
+        elevation: 10,
+    },
     formTitle: {
         fontSize: 28,
         fontWeight: "700",
-        color: "#003049",
+        color: "#1F2937",
         marginBottom: 16,
         textAlign: "center",
     },
     stepDescription: {
-        fontSize: 18,
-        color: "#669BBC",
+        fontSize: 16,
+        color: "#6B7280",
         textAlign: "center",
         marginBottom: 40,
         fontWeight: "500",
@@ -291,53 +330,53 @@ const styles = StyleSheet.create({
     rowContainer: { flexDirection: "row", gap: 20 },
     halfInput: { flex: 1 },
     label: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: "600",
-        color: "#003049",
+        color: "#374151",
         marginBottom: 12,
     },
     input: {
-        backgroundColor: "#FDF0D5",
-        borderWidth: 3,
-        borderColor: "#669BBC",
-        borderRadius: 20,
+        backgroundColor: "#F9FAFB",
+        borderWidth: 2,
+        borderColor: "#E5E7EB",
+        borderRadius: 16,
         padding: 20,
-        fontSize: 18,
-        color: "#003049",
+        fontSize: 16,
+        color: "#1F2937",
         fontWeight: "500",
     },
     passwordContainer: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#FDF0D5",
-        borderWidth: 3,
-        borderColor: "#669BBC",
-        borderRadius: 20,
+        backgroundColor: "#F9FAFB",
+        borderWidth: 2,
+        borderColor: "#E5E7EB",
+        borderRadius: 16,
     },
     passwordInput: {
         flex: 1,
         padding: 20,
-        fontSize: 18,
-        color: "#003049",
+        fontSize: 16,
+        color: "#1F2937",
         fontWeight: "500",
     },
     eyeButton: { padding: 20 },
     buttonContainer: { padding: 24 },
     nextButton: {
-        backgroundColor: "#C1121F",
+        backgroundColor: "#1E40AF",
         padding: 20,
-        borderRadius: 28,
+        borderRadius: 16,
         alignItems: "center",
-        shadowColor: "#780000",
-        shadowOffset: { width: 0, height: 6 },
+        shadowColor: "#1E40AF",
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
-        shadowRadius: 10,
-        elevation: 10,
+        shadowRadius: 12,
+        elevation: 8,
     },
-    nextButtonText: { color: "#FDF0D5", fontSize: 20, fontWeight: "700" },
+    nextButtonText: { color: "#FFFFFF", fontSize: 18, fontWeight: "700" },
     backButton: { alignItems: "center", marginTop: 20 },
-    backButtonText: { color: "#669BBC", fontSize: 18, fontWeight: "600" },
+    backButtonText: { color: "#6B7280", fontSize: 16, fontWeight: "500" },
     loginRedirect: { alignItems: "center", marginTop: 20 },
-    loginRedirectText: { color: "#003049", fontSize: 16 },
-    loginRedirectLink: { color: "#C1121F", fontWeight: "700" },
+    loginRedirectText: { color: "#6B7280", fontSize: 16 },
+    loginRedirectLink: { color: "#1E40AF", fontWeight: "700" },
 });

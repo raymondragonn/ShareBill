@@ -6,7 +6,7 @@ from datetime import datetime
 class TemporaryCard(Base):
     __tablename__ = "temporary_cards"
     id = Column(Integer, primary_key=True, index=True)
-    group_id = Column(Integer, ForeignKey("group.id"))
+    group_id = Column(Integer, ForeignKey("groups.id"))
     card_number = Column(String, unique=True, index=True)
     expiry_date = Column(String)  # MM/YY format
     cvv = Column(String)

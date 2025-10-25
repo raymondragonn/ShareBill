@@ -6,7 +6,7 @@ from datetime import datetime
 class Payment(Base):
     __tablename__ = "payments"
     id = Column(Integer, primary_key=True, index=True)
-    group_id = Column(Integer, ForeignKey("group.id"))
+    group_id = Column(Integer, ForeignKey("groups.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
     amount = Column(Float)
     status = Column(String, default="pending")  # pending, completed, failed

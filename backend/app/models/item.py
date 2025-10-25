@@ -5,12 +5,13 @@ from app.database import Base
 class Item(Base):
     __tablename__ = "items"
     id = Column(Integer, primary_key=True, index=True)
-    group_id = Column(Integer, ForeignKey("group.id"))
+    group_id = Column(Integer, ForeignKey("groups.id"))
+    receipt_id = Column(Integer, ForeignKey("receipts.id"))
     name = Column(String, index=True)
     price = Column(Float)
     quantity = Column(Integer, default=1)
     description = Column(Text, nullable=True)
     
     # Relaciones
-    session = relationship("Session", back_populates="items")
+    receipt = relationship("Receipt", back_populates="items")
     user_selections = relationship("UserSelection", back_populates="item")

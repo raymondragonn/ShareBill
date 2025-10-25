@@ -6,6 +6,16 @@ from pydantic import BaseModel, EmailStr
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class LoginResponse(BaseModel):
+    id: int
+    nombre: str
+    apellido: str
+    email: str
+
 class UserCreate(BaseModel):
     nombre: str
     apellido: str
@@ -33,3 +43,17 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     return new_user
+
+@router.post("/login", response_model=LoginResponse)
+def login(user: UserLogin, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.email == user.email).first()
+
+    if not db_user or db_user.password != user.password:
+        raise HTTPException(status_code=401, detail="Credenciales inválidas")
+
+    return {
+        "id": db_user.id,
+        "nombre": db_user.nombre,
+        "apellido": db_user.apellido,
+        "email": db_user.email,
+    }

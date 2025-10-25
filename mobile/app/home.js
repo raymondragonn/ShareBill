@@ -12,7 +12,7 @@ export default function HomePage() {
       </View>
 
       <View style={styles.actionsContainer}>
-        <Link href="/groups" asChild>
+        <Link href="/admin/qr" asChild>
           <TouchableOpacity style={styles.actionButton}>
             <Ionicons name="add-circle" size={36} color="#000000" />
             <Text style={styles.actionButtonText}>Nuevo grupo</Text>

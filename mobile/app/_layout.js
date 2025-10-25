@@ -7,13 +7,15 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: '#8e09d5',
         tabBarInactiveTintColor: '#8E8E93',
+        tabBarShowLabel: false,
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
           borderTopColor: '#E5E5EA',
-          paddingBottom: 5,
-          paddingTop: 5,
-          height: 60,
+          paddingBottom: 15,
+          paddingTop: 10,
+          height: 80,
+          marginBottom: 10,
         },
         headerStyle: {
           backgroundColor: '#8e09d5',
@@ -28,9 +30,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Inicio',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+            <Ionicons name="home" size={size + 4} color={color} />
           ),
         }}
       />
@@ -54,31 +55,25 @@ export default function TabLayout() {
       />
         <Tabs.Screen
           name="admin/qr"
-          options={{
-            title: 'Nuevo Grupo',
-            href: 'admin/qr',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="add-circle" size={size} color={color} />
-            ),
-          }}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="add-circle" size={size + 4} color={color} />
+          ),
+        }}
         />
         <Tabs.Screen
           name="scan-qr"
           options={{
-            title: 'Unirse a grupo',
-            href: 'scan-qr',
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="scan" size={size} color={color} />
+              <Ionicons name="scan" size={size + 4} color={color} />
             ),
           }}
         />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Perfil',
-          href: 'profile',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+            <Ionicons name="person" size={size + 4} color={color} />
           ),
         }}
       />

@@ -1,18 +1,22 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
-from app.routes import users, tickets
+from app.routes import users, payments
 
-app = FastAPI(
-    title="ShareBill API",
-    description="API para procesar tickets y dividir gastos",
-    version="1.0.0"
-)
-
+# Crear tablas
 Base.metadata.create_all(bind=engine)
 
-app.include_router(users.router)
-app.include_router(tickets.router)
+app = FastAPI(title="Backend ShareBill")
 
-@app.get("/")
-def root():
-    return {"message": "ShareBill API - OK"}
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8081"],  # Cambia a IP específica después
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Incluir rutas
+app.include_router(users.router)
+app.include_router(payments.router)

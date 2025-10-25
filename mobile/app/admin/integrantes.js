@@ -10,20 +10,17 @@ export default function AdminIntegrantesPage() {
     { id: 5, name: 'Ana', joined: false },
   ];
 
+  const getAvatarColor = (index) => {
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'];
+    return colors[index % colors.length];
+  };
+
   const handleContinue = () => {
     // Navegar a la pantalla de productos
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Integrantes</Text>
-        <View style={styles.placeholder} />
-      </View>
-
       <View style={styles.content}>
         <View style={styles.qrInfo}>
           <Text style={styles.qrLabel}>QR 1838</Text>
@@ -34,27 +31,23 @@ export default function AdminIntegrantesPage() {
           <Text style={styles.memberCount}>{members.filter(m => m.joined).length} de {members.length} miembros</Text>
         </View>
 
-        <ScrollView style={styles.membersList}>
-          {members.map((member) => (
-            <View key={member.id} style={styles.memberItem}>
-              <View style={styles.memberAvatar}>
-                <Text style={styles.memberInitial}>{member.name[0]}</Text>
-              </View>
-              <View style={styles.memberInfo}>
+        <ScrollView style={styles.membersList} showsVerticalScrollIndicator={false}>
+          <View style={styles.membersGrid}>
+            {members.map((member, index) => (
+              <View key={member.id} style={styles.memberCard}>
+                <View style={[styles.memberAvatar, { backgroundColor: getAvatarColor(index) }]}>
+                  <Text style={styles.memberInitial}>{member.name[0]}</Text>
+                </View>
                 <Text style={styles.memberName}>{member.name}</Text>
-                <Text style={styles.memberStatus}>
-                  {member.joined ? 'Conectado' : 'Esperando...'}
-                </Text>
+                <View style={styles.memberStatusContainer}>
+                  <View style={[styles.statusDot, { backgroundColor: member.joined ? "#4CAF50" : "#FF9800" }]} />
+                  <Text style={styles.memberStatus}>
+                    {member.joined ? 'Listo' : 'Esperando'}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.memberStatusIcon}>
-                <Ionicons 
-                  name={member.joined ? "checkmark-circle" : "time"} 
-                  size={24} 
-                  color={member.joined ? "#34C759" : "#FF9500"} 
-                />
-              </View>
-            </View>
-          ))}
+            ))}
+          </View>
         </ScrollView>
 
         <View style={styles.summary}>
@@ -83,31 +76,7 @@ export default function AdminIntegrantesPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
-  },
-  header: {
-    backgroundColor: '#007AFF',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 20,
-    paddingTop: 50,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  placeholder: {
-    width: 40,
+    backgroundColor: '#F8F8F8',
   },
   content: {
     flex: 1,
@@ -118,71 +87,94 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   qrLabel: {
-    fontSize: 16,
+    fontSize: 25,
     color: '#8E8E93',
   },
   membersSection: {
+    backgroundColor: '#333333',
+    padding: 20,
+    borderRadius: 12,
     marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#1C1C1E',
+    color: '#F8F8F8',
     marginBottom: 5,
   },
   memberCount: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: '#F8F8F8',
+    opacity: 0.8,
   },
   membersList: {
     flex: 1,
     marginBottom: 20,
   },
-  memberItem: {
+  membersGrid: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: 5,
+  },
+  memberCard: {
+    width: '48%',
+    backgroundColor: '#C2A2DA',
+    borderRadius: 16,
     padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
+    marginBottom: 16,
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 1,
+      height: 2,
     },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   memberAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#007AFF',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
   },
   memberInitial: {
-    fontSize: 16,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#FFFFFF',
-  },
-  memberInfo: {
-    flex: 1,
   },
   memberName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1C1C1E',
-    marginBottom: 2,
+    color: '#F5F5F5',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  memberStatusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
   },
   memberStatus: {
-    fontSize: 14,
-    color: '#8E8E93',
-  },
-  memberStatusIcon: {
-    marginLeft: 12,
+    fontSize: 12,
+    color: '#363636',
+    fontWeight: '500',
   },
   summary: {
     backgroundColor: '#FFFFFF',
@@ -206,7 +198,7 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 16,
-    color: '#8E8E93',
+    color: '#333333',
   },
   summaryValue: {
     fontSize: 16,
@@ -214,13 +206,13 @@ const styles = StyleSheet.create({
     color: '#1C1C1E',
   },
   continueButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#8A2BE2',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
   },
   continueButtonText: {
-    color: '#FFFFFF',
+    color: '#F8F8F8',
     fontSize: 16,
     fontWeight: 'bold',
   },

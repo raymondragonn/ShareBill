@@ -2,47 +2,12 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from "reac
 import { useState } from "react";
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-
-  const handleLogin = () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Por favor completa todos los campos');
-      return;
-    }
-    // Aquí iría la lógica de autenticación
-    Alert.alert('Éxito', 'Inicio de sesión exitoso');
-    router.push('/home');
-  };
-
-  const handleRegister = () => {
-    router.push('/auth/register');
-  };
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>ShareBill</Text>
-        <Text style={styles.subtitle}>Comparte gastos fácilmente</Text>
-      </View>
-
-      <View style={styles.form}>
-        <Text style={styles.formTitle}>Iniciar Sesión</Text>
-        
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Correo electrónico</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="tu@email.com"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-        </View>
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Contraseña</Text>
@@ -67,16 +32,96 @@ export default function LoginPage() {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
-        </TouchableOpacity>
+    const handleLogin = async () => {
+        if (!email || !password) {
+            Alert.alert('Error', 'Por favor completa todos los campos');
+            return;
+        }
 
-        <TouchableOpacity style={styles.registerLink} onPress={handleRegister}>
-          <Text style={styles.registerText}>¿No tienes cuenta? Regístrate</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+        try {
+            const response = await fetch("http://localhost:8000/users/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                Alert.alert("Error", data.detail || "Credenciales inválidas");
+                return;
+            }
+
+            await AsyncStorage.setItem("user", JSON.stringify(data));
+
+            Alert.alert("Bienvenido", `Hola ${data.nombre}`);
+            router.replace("/home"); // ✅ redirige al Home
+
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Error", "No se pudo conectar con el servidor");
+        }
+    };
+
+    const handleRegister = () => {
+        router.push('/auth/register');
+    };
+
+    return (
+        <View style={styles.container}>
+            <View style={styles.header}>
+                <Text style={styles.title}>ShareBill</Text>
+                <Text style={styles.subtitle}>Comparte gastos fácilmente</Text>
+            </View>
+
+            <View style={styles.form}>
+                <Text style={styles.formTitle}>Iniciar Sesión</Text>
+
+                <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Correo electrónico</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="tu@email.com"
+                        value={email}
+                        onChangeText={setEmail}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                    />
+                </View>
+
+                <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Contraseña</Text>
+                    <View style={styles.passwordContainer}>
+                        <TextInput
+                            style={styles.passwordInput}
+                            placeholder="Tu contraseña"
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry={!showPassword}
+                        />
+                        <TouchableOpacity
+                            style={styles.eyeButton}
+                            onPress={() => setShowPassword(!showPassword)}
+                        >
+                            <Ionicons
+                                name={showPassword ? "eye-off" : "eye"}
+                                size={20}
+                                color="#8E8E93"
+                            />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+                    <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.registerLink} onPress={handleRegister}>
+                    <Text style={styles.registerText}>¿No tienes cuenta? Regístrate</Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({

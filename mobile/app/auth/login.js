@@ -132,19 +132,17 @@ export default function LoginPage() {
                 onHide={hideToast}
                 duration={toast.duration}
             />
-            {/* Header con gradiente bancario */}
+            {/* Header con gradiente elegante */}
             <LinearGradient
-                colors={['#1e3c72', '#2a5298', '#3b82f6']}
+                colors={['#f8fafc', '#e2e8f0', '#cbd5e1']}
                 style={styles.headerGradient}
             >
                 <View style={styles.header}>
                     <Image 
-                        source={require('../../assets/LogoMarca.jpeg')} 
+                        source={require('../../assets/LogoEmpresa2.png')} 
                         style={styles.logo}
                         resizeMode="contain"
                     />
-                    <Text style={styles.title}>ShareBill</Text>
-                    <Text style={styles.subtitle}>Comparte gastos fácilmente</Text>
                 </View>
             </LinearGradient>
 
@@ -209,16 +207,16 @@ const styles = StyleSheet.create({
   // Header con gradiente
   headerGradient: {
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 60,
+    paddingBottom: 20,
   },
   header: {
     alignItems: 'center',
     paddingHorizontal: 24,
   },
   logo: {
-    width: 100,
-    height: 100,
-    marginBottom: 20,
+    width: 200,
+    height: 200,
+    marginBottom: 0,
     borderRadius: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -229,18 +227,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 36,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#1F2937',
     marginBottom: 12,
   },
   subtitle: {
-    fontSize: 18,
-    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 16,
+    color: '#64748B',
     fontWeight: '500',
   },
   form: {
     flex: 1,
     padding: 24,
-    marginTop: -30,
+    marginTop: -50,
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,

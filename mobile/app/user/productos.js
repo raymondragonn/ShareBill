@@ -1,24 +1,62 @@
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Animated, Platform, Dimensions } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Animated, Platform, Dimensions, Alert, ActivityIndicator } from "react-native";
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import LoadingPayment from '../components/LoadingPayment';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ProductosPage() {
-  const [products, setProducts] = useState([
-    { id: 1, name: 'Hamburguesa', price: 12.50 },
-    { id: 2, name: 'Leche', price: 3.20 },
-    { id: 3, name: 'Limón', price: 1.50 },
-    { id: 4, name: 'Pan', price: 2.80 },
-    { id: 5, name: 'Café', price: 4.50 },
-  ]);
-  
+  const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState(new Set());
   const [activeTab, setActiveTab] = useState('PRODUCTOS');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [isPaymentCompleted, setIsPaymentCompleted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [receiptInfo, setReceiptInfo] = useState(null);
   const translateX = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    loadReceiptData();
+  }, []);
+
+  const loadReceiptData = async () => {
+    try {
+      console.log('📦 Cargando datos del recibo desde AsyncStorage...');
+      const receiptJSON = await AsyncStorage.getItem('currentReceipt');
+      
+      if (receiptJSON) {
+        const receipt = JSON.parse(receiptJSON);
+        console.log('✅ Recibo encontrado:', receipt);
+        
+        setReceiptInfo(receipt);
+        
+        // Convertir los artículos del recibo al formato de productos
+        const productsFromReceipt = receipt.articles.map((article, index) => ({
+          id: index + 1,
+          name: article.descripcion || article.nombre || article.name || `Producto ${index + 1}`,
+          price: parseFloat(article.precio_unitario || article.precio || article.price || 0),
+          quantity: article.cantidad || 1,
+          lineTotal: parseFloat(article.monto_linea || 0)
+        }));
+        
+        console.log('🛍️ Productos cargados:', productsFromReceipt);
+        setProducts(productsFromReceipt);
+      } else {
+        console.log('⚠️ No se encontró recibo guardado');
+        Alert.alert(
+          'Sin productos',
+          'No se encontraron productos del ticket. Por favor, escanea un ticket primero.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('❌ Error al cargar productos:', error);
+      Alert.alert('Error', 'No se pudieron cargar los productos del ticket');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleProductSelection = (productId) => {
     setSelectedProducts(prev => {
@@ -202,6 +240,26 @@ export default function ProductosPage() {
     );
   }
 
+  // Mostrar loading mientras se cargan los productos
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <LinearGradient
+          colors={['#1e3c72', '#2a5298', '#3b82f6']}
+          style={styles.headerGradient}
+        >
+          <View style={styles.header}>
+            <Text style={styles.title}>Productos</Text>
+          </View>
+        </LinearGradient>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#1E40AF" />
+          <Text style={styles.loadingText}>Cargando productos...</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {/* Header con gradiente bancario */}
@@ -211,6 +269,11 @@ export default function ProductosPage() {
       >
         <View style={styles.header}>
           <Text style={styles.title}>Productos</Text>
+          {receiptInfo && (
+            <Text style={styles.storeName}>
+              {receiptInfo.store_name || 'Ticket'}
+            </Text>
+          )}
           <Text style={styles.subtitle}>
             {activeTab === 'PRODUCTOS' 
               ? 'Selecciona los productos que te corresponden' 
@@ -273,11 +336,29 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  storeName: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '600',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.8)',
+    fontWeight: '500',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#6B7280',
     fontWeight: '500',
   },
   // Estilos para la barra de navegación

@@ -70,6 +70,11 @@ export default function ProfilePage() {
             >
                 <View style={styles.header}>
                     <View style={styles.profileCard}>
+                        <Image 
+                            source={require('../assets/LogoEmpresa2.png')} 
+                            style={styles.cardLogo}
+                            resizeMode="contain"
+                        />
                         <View style={styles.profileInfo}>
                             <View style={styles.avatar}>
                                 <Text style={styles.avatarText}>
@@ -216,6 +221,15 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.15,
         shadowRadius: 20,
         elevation: 10,
+        position: 'relative',
+    },
+    cardLogo: {
+        position: 'absolute',
+        top: 5,
+        right: 10,
+        width: 80,
+        height: 80,
+        opacity: 1,
     },
     profileInfo: { 
         flexDirection: "row", 

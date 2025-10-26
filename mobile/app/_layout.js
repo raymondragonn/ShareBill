@@ -134,6 +134,7 @@ export default function TabLayout() {
                 <Tabs.Screen name="admin/escanear-ticket" options={{ href: null }} />
                 <Tabs.Screen name="pago-completado" options={{ href: null }} />
                 <Tabs.Screen name="components/LoadingPayment" options={{ href: null }} />
+                <Tabs.Screen name="components/Toast" options={{ href: null }} />
             </Tabs>
         </GestureHandlerRootView>
     );

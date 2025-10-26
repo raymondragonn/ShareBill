@@ -76,7 +76,7 @@ export default function RegisterPage() {
                     console.log('🎯 Entrando en lógica de grupo...');
                     try {
                         console.log('Intentando unirse al grupo con código:', groupCode, 'user_id:', data.id);
-                        const joinResponse = await fetch(`http://localhost:8000/groups/join-by-code?code=${groupCode}&user_id=${data.id}`, {
+                        const joinResponse = await fetch(`${API_URL}/groups/join-by-code?code=${groupCode}&user_id=${data.id}`, {
                             method: 'POST'
                         });
                         
@@ -220,7 +220,7 @@ export default function RegisterPage() {
             }
 
             try {
-                const response = await fetch("http://localhost:8000/payments/add", {
+                const response = await fetch(`${API_URL}/payments/add`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({

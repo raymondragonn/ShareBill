@@ -69,7 +69,7 @@ export default function LoginPage() {
             if (groupCode) {
                 try {
                     console.log('Intentando unirse al grupo con código:', groupCode, 'user_id:', data.id);
-                    const joinResponse = await fetch(`http://localhost:8000/groups/join-by-code?code=${groupCode}&user_id=${data.id}`, {
+                    const joinResponse = await fetch(`${API_URL}/groups/join-by-code?code=${groupCode}&user_id=${data.id}`, {
                         method: 'POST'
                     });
                     

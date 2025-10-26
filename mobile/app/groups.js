@@ -1,8 +1,13 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Platform, Dimensions } from "react-native";
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Platform, Dimensions, Modal } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useState } from 'react';
+import { useRouter } from 'expo-router';
 
 export default function GroupsPage() {
+  const router = useRouter();
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  
   // Datos de ejemplo de usuarios que se han unido al grupo
   const groupMembers = [
     {
@@ -20,24 +25,9 @@ export default function GroupsPage() {
       joinTime: "Hace 1 hora",
       avatar: "C",
       isAdmin: false
-    },
-    {
-      id: 3,
-      name: "Ana Martínez",
-      email: "ana.martinez@email.com",
-      joinTime: "Hace 30 minutos",
-      avatar: "A",
-      isAdmin: false
-    },
-    {
-      id: 4,
-      name: "Luis Fernández",
-      email: "luis.fernandez@email.com",
-      joinTime: "Hace 15 minutos",
-      avatar: "L",
-      isAdmin: false
     }
   ];
+
 
   const handleRemoveUser = (userId) => {
     // Aquí se implementaría la lógica para remover un usuario
@@ -47,6 +37,19 @@ export default function GroupsPage() {
   const handleMakeAdmin = (userId) => {
     // Aquí se implementaría la lógica para hacer admin a un usuario
     console.log('Hacer admin:', userId);
+  };
+
+  const handleContinue = () => {
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmGroup = () => {
+    setShowConfirmModal(false);
+    router.push('/admin/escanear-ticket');
+  };
+
+  const handleCancelConfirm = () => {
+    setShowConfirmModal(false);
   };
 
   const UserCard = ({ user }) => (
@@ -97,7 +100,7 @@ export default function GroupsPage() {
       >
         <View style={styles.header}>
           <View style={styles.headerInfo}>
-            <Text style={styles.title}>Integrantes del Grupo</Text>
+            <Text style={styles.title}>Integrantes del grupo</Text>
             <Text style={styles.memberCount}>{groupMembers.length} miembros</Text>
           </View>
           <TouchableOpacity style={styles.settingsButton}>
@@ -120,7 +123,72 @@ export default function GroupsPage() {
             <Text style={styles.emptySubtitle}>Comparte el código QR para que otros se unan al grupo</Text>
           </View>
         )}
+        
+        {groupMembers.length > 0 && (
+          <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
+            <View style={styles.buttonIconContainer}>
+              <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
+            </View>
+            <Text style={styles.continueButtonText}>CONTINUAR</Text>
+          </TouchableOpacity>
+        )}
       </View>
+
+      {/* Modal de confirmación del grupo completo */}
+      <Modal
+        visible={showConfirmModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleCancelConfirm}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.confirmModalContainer}>
+            <View style={styles.confirmModalHeader}>
+              <Ionicons name="checkmark-circle" size={28} color="#25D366" />
+              <Text style={styles.confirmModalTitle}>Confirmar Grupo Completo</Text>
+            </View>
+            
+            <Text style={styles.confirmModalMessage}>
+              ¿Estás seguro de que el grupo está completo con todos los usuarios que participarán en la división de la cuenta?
+            </Text>
+            
+            <View style={styles.membersPreview}>
+              <Text style={styles.membersPreviewTitle}>Integrantes del grupo:</Text>
+              {groupMembers.map((user) => (
+                <View key={user.id} style={styles.memberPreviewItem}>
+                  <View style={styles.memberPreviewAvatar}>
+                    <Text style={styles.memberPreviewAvatarText}>{user.avatar}</Text>
+                  </View>
+                  <View style={styles.memberPreviewInfo}>
+                    <Text style={styles.memberPreviewName}>{user.name}</Text>
+                    <Text style={styles.memberPreviewEmail}>{user.email}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+            
+            <Text style={styles.confirmModalSubtext}>
+              Una vez confirmado, podrás proceder a escanear el ticket de compra.
+            </Text>
+            
+            <View style={styles.confirmModalActions}>
+              <TouchableOpacity 
+                style={styles.confirmModalCancelButton}
+                onPress={handleCancelConfirm}
+              >
+                <Text style={styles.confirmModalCancelText}>Cancelar</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.confirmModalConfirmButton}
+                onPress={handleConfirmGroup}
+              >
+                <Text style={styles.confirmModalConfirmText}>Confirmar y Continuar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -173,7 +241,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   membersList: {
-    gap: 16,
+    // gap: 16, // No compatible con todas las versiones
   },
   userCard: {
     backgroundColor: '#FFFFFF',
@@ -182,6 +250,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginBottom: 16, // Espacio entre tarjetas
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -285,5 +354,174 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     maxWidth: 280,
+  },
+  
+  // Estilos para el botón continuar
+  continueButton: {
+    backgroundColor: '#1E40AF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+    borderRadius: 16,
+    width: '100%',
+    marginTop: 20,
+    marginBottom: 20,
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  continueButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  buttonIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  
+  // Estilos para el modal de confirmación
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  confirmModalContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+    maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 15,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+  },
+  confirmModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  confirmModalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginLeft: 12,
+  },
+  confirmModalMessage: {
+    fontSize: 16,
+    color: '#1F2937',
+    lineHeight: 22,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  membersPreview: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  membersPreviewTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 12,
+  },
+  memberPreviewItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  memberPreviewAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#1E40AF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  memberPreviewAvatarText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  memberPreviewInfo: {
+    flex: 1,
+  },
+  memberPreviewName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 2,
+  },
+  memberPreviewEmail: {
+    fontSize: 12,
+    color: '#6B7280',
+  },
+  confirmModalSubtext: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 24,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  confirmModalActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  confirmModalCancelButton: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  confirmModalCancelText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  confirmModalConfirmButton: {
+    flex: 1,
+    backgroundColor: '#25D366',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    alignItems: 'center',
+    shadowColor: '#25D366',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  confirmModalConfirmText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });

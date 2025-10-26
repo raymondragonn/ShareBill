@@ -6,24 +6,7 @@ import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-
-// Configuración de API según la plataforma
-const getApiUrl = () => {
-  if (Platform.OS === 'web') {
-    // En web, usar localhost directamente
-    return 'http://localhost:8000';
-  } else if (Platform.OS === 'android') {
-    // Android Emulator usa 10.0.2.2 para acceder a localhost del host
-    return 'http://10.0.2.2:8000';
-  } else if (Platform.OS === 'ios') {
-    // iOS Simulator puede usar localhost directamente
-    return 'http://localhost:8000';
-  } else {
-    // Dispositivo físico - CAMBIA ESTA IP POR LA DE TU COMPUTADORA
-    // Puedes obtenerla con: ipconfig (Windows) o ifconfig (Mac/Linux)
-    return 'http://10.22.124.98:8000'; // Cambia esta IP
-  }
-};
+import { API_URL } from '../../config';
 
 export default function EscanearTicketPage() {
   const router = useRouter();
@@ -142,7 +125,7 @@ export default function EscanearTicketPage() {
         }
 
         // 3. Configuración del Endpoint
-        const BASE_URL = getApiUrl();
+        const BASE_URL = API_URL;
         const API_URL = `${BASE_URL}/tickets/procesar`;
         
         console.log('🌐 Enviando petición a:', API_URL);

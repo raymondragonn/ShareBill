@@ -149,7 +149,7 @@ export default function WaitingRoomPage() {
       
       setGroupMembers(simulatedMembers.map(member => ({
         id: member.id,
-        name: `${member.nombre} ${member.apellido}`,p
+        name: `${member.nombre} ${member.apellido}`,
         email: member.email,
         avatar: member.nombre.charAt(0).toUpperCase(),
       })));

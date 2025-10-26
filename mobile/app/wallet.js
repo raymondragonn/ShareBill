@@ -8,6 +8,7 @@ import {
     Alert,
     Platform,
     Dimensions,
+    KeyboardAvoidingView,
     TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -233,51 +234,54 @@ export default function WalletPage() {
                 style={{ margin: 0, justifyContent: "center", alignItems: "center" }}
                 backdropOpacity={0.5}
             >
-                <View style={styles.modalContent}>
-                    <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>Opciones de Tarjeta</Text>
-                        <TouchableOpacity onPress={() => setShowModal(false)}>
-                            <Ionicons name="close" size={24} color="#8E8E93" />
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+                >
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={[styles.modalTitle, { color: "#000" }]}>Opciones de Tarjeta</Text>
+                            <TouchableOpacity onPress={() => setShowModal(false)}>
+                                <Ionicons name="close" size={24} color="#8E8E93" />
+                            </TouchableOpacity>
+                        </View>
+
+                        {selectedCard && (
+                            <View
+                                style={[
+                                    styles.cardPreview,
+                                    selectedCard.cardColor === "blue"
+                                        ? styles.blueCardPreview
+                                        : selectedCard.cardColor === "gray"
+                                            ? styles.grayCardPreview
+                                            : styles.orangeCardPreview,
+                                ]}
+                            >
+                                <Text style={styles.cardPreviewBank}>{selectedCard.bank}</Text>
+                                <Text style={styles.cardPreviewCardName}>{selectedCard.cardName}</Text>
+                                <Text style={styles.cardPreviewNumber}>{selectedCard.number}</Text>
+                                <Text style={styles.cardPreviewHolderName}>{selectedCard.name}</Text>
+                                <Text style={styles.cardPreviewExpiry}>{selectedCard.expiry}</Text>
+                            </View>
+                        )}
+
+                        <TouchableOpacity
+                            style={[styles.modalButton, styles.setDefaultButton]}
+                            onPress={handleSetDefault}
+                        >
+                            <Ionicons name="star" size={20} color="#FFD700" />
+                            <Text style={styles.setDefaultText}>Predeterminada</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.modalButton, styles.deleteButton]}
+                            onPress={handleDeleteCard}
+                        >
+                            <Ionicons name="trash" size={20} color="#FF3B30" />
+                            <Text style={styles.deleteText}>Eliminar</Text>
                         </TouchableOpacity>
                     </View>
-
-                    {selectedCard && (
-                        <View
-                            style={[
-                                styles.cardPreview,
-                                selectedCard.cardColor === "blue"
-                                    ? styles.blueCardPreview
-                                    : selectedCard.cardColor === "gray"
-                                        ? styles.grayCardPreview
-                                        : styles.orangeCardPreview,
-                            ]}
-                        >
-                            <Text style={styles.cardPreviewBank}>{selectedCard.bank}</Text>
-                            <Text style={styles.cardPreviewCardName}>
-                                {selectedCard.cardName}
-                            </Text>
-                            <Text style={styles.cardPreviewNumber}>{selectedCard.number}</Text>
-                            <Text style={styles.cardPreviewHolderName}>{selectedCard.name}</Text>
-                            <Text style={styles.cardPreviewExpiry}>{selectedCard.expiry}</Text>
-                        </View>
-                    )}
-
-                    <TouchableOpacity
-                        style={[styles.modalButton, styles.setDefaultButton]}
-                        onPress={handleSetDefault}
-                    >
-                        <Ionicons name="star" size={20} color="#FFD700" />
-                        <Text style={styles.setDefaultText}>Predeterminada</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[styles.modalButton, styles.deleteButton]}
-                        onPress={handleDeleteCard}
-                    >
-                        <Ionicons name="trash" size={20} color="#FF3B30" />
-                        <Text style={styles.deleteText}>Eliminar</Text>
-                    </TouchableOpacity>
-                </View>
+                </KeyboardAvoidingView>
             </Modal>
 
             {/* Modal agregar tarjeta */}
@@ -289,74 +293,79 @@ export default function WalletPage() {
                 style={{ margin: 0, justifyContent: "flex-end" }}
                 backdropOpacity={0.5}
             >
-                <View style={styles.addModalContent}>
-                    <LinearGradient
-                        colors={["#1e3c72", "#2a5298"]}
-                        style={styles.modalHeaderGradient}
-                    >
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Agregar Nueva Tarjeta</Text>
-                            <TouchableOpacity onPress={() => setShowAddModal(false)}>
-                                <Ionicons name="close" size={24} color="#FFFFFF" />
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    style={{ flex: 1, justifyContent: "flex-end" }}
+                >
+                    <View style={styles.addModalContent}>
+                        <LinearGradient
+                            colors={["#1e3c72", "#2a5298"]}
+                            style={styles.modalHeaderGradient}
+                        >
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>Agregar Nueva Tarjeta</Text>
+                                <TouchableOpacity onPress={() => setShowAddModal(false)}>
+                                    <Ionicons name="close" size={24} color="#FFFFFF" />
+                                </TouchableOpacity>
+                            </View>
+                        </LinearGradient>
+
+                        <ScrollView
+                            contentContainerStyle={{ padding: 20, paddingBottom: 80 }}
+                            showsVerticalScrollIndicator={false}
+                        >
+                            <TextInput
+                                style={styles.modalInput}
+                                placeholder="Nombre del banco"
+                                value={newCard.bank}
+                                onChangeText={(text) => setNewCard({ ...newCard, bank: text })}
+                            />
+                            <TextInput
+                                style={styles.modalInput}
+                                placeholder="Nombre de la tarjeta"
+                                value={newCard.cardName}
+                                onChangeText={(text) => setNewCard({ ...newCard, cardName: text })}
+                            />
+                            <TextInput
+                                style={styles.modalInput}
+                                placeholder="Número de tarjeta"
+                                keyboardType="numeric"
+                                value={newCard.number}
+                                onChangeText={(text) => setNewCard({ ...newCard, number: text })}
+                            />
+                            <TextInput
+                                style={styles.modalInput}
+                                placeholder="MM/AA"
+                                keyboardType="numeric"
+                                value={newCard.expiry}
+                                onChangeText={(text) => setNewCard({ ...newCard, expiry: text })}
+                            />
+                            <TextInput
+                                style={styles.modalInput}
+                                placeholder="CVV"
+                                keyboardType="numeric"
+                                secureTextEntry
+                                value={newCard.cvv}
+                                onChangeText={(text) => setNewCard({ ...newCard, cvv: text })}
+                            />
+                        </ScrollView>
+
+                        <View style={styles.modalFooter}>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.cancelButton]}
+                                onPress={() => setShowAddModal(false)}
+                            >
+                                <Text style={styles.cancelText}>Cancelar</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.saveButton]}
+                                onPress={handleSaveCard}
+                            >
+                                <Text style={styles.saveText}>Guardar</Text>
                             </TouchableOpacity>
                         </View>
-                    </LinearGradient>
-
-                    <ScrollView
-                        style={styles.modalBody}
-                        contentContainerStyle={{ flexGrow: 1, paddingBottom: 60 }}
-                    >
-                        <TextInput
-                            style={styles.modalInput}
-                            placeholder="Nombre del banco"
-                            value={newCard.bank}
-                            onChangeText={(text) => setNewCard({ ...newCard, bank: text })}
-                        />
-                        <TextInput
-                            style={styles.modalInput}
-                            placeholder="Nombre de la tarjeta"
-                            value={newCard.cardName}
-                            onChangeText={(text) => setNewCard({ ...newCard, cardName: text })}
-                        />
-                        <TextInput
-                            style={styles.modalInput}
-                            placeholder="Número de tarjeta"
-                            keyboardType="numeric"
-                            value={newCard.number}
-                            onChangeText={(text) => setNewCard({ ...newCard, number: text })}
-                        />
-                        <TextInput
-                            style={styles.modalInput}
-                            placeholder="MM/AA"
-                            keyboardType="numeric"
-                            value={newCard.expiry}
-                            onChangeText={(text) => setNewCard({ ...newCard, expiry: text })}
-                        />
-                        <TextInput
-                            style={styles.modalInput}
-                            placeholder="CVV"
-                            keyboardType="numeric"
-                            secureTextEntry
-                            value={newCard.cvv}
-                            onChangeText={(text) => setNewCard({ ...newCard, cvv: text })}
-                        />
-                    </ScrollView>
-
-                    <View style={styles.modalFooter}>
-                        <TouchableOpacity
-                            style={[styles.modalButton, styles.cancelButton]}
-                            onPress={() => setShowAddModal(false)}
-                        >
-                            <Text style={styles.cancelText}>Cancelar</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.modalButton, styles.saveButton]}
-                            onPress={handleSaveCard}
-                        >
-                            <Text style={styles.saveText}>Guardar</Text>
-                        </TouchableOpacity>
                     </View>
-                </View>
+                </KeyboardAvoidingView>
             </Modal>
         </View>
     );
@@ -430,6 +439,8 @@ const styles = StyleSheet.create({
         padding: 20,
         width: "90%",
         elevation: 15,
+        maxHeight: '80%',
+        minHeight: 200,
     },
     addModalContent: {
         backgroundColor: "#fff",

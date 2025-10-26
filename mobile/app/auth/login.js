@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from 'expo-linear-gradient';
+import { API_URL } from "../../config";
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -40,7 +41,7 @@ export default function LoginPage() {
         }
 
         try {
-            const response = await fetch("http://localhost:8000/users/login", {
+            const response = await fetch(`${API_URL}/users/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),

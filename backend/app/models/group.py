@@ -7,7 +7,7 @@ class Group(Base):
     __tablename__ = "groups"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
-    admin_id = Column(Integer, ForeignKey(4"users.id"), nullable=True)
+    admin_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     qr_code = Column(String, unique=True, index=True)
     join_link = Column(String, unique=True, index=True)
     status = Column(String, default="active")  # active, completed, cancelled

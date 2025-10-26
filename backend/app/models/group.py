@@ -17,5 +17,7 @@ class Group(Base):
     # Relaciones
     admin = relationship("User", back_populates="created_groups")
     members = relationship("GroupMember", back_populates="group")
-    session = relationship("Session", back_populates="group", uselist=False)
     receipt = relationship("Receipt", back_populates="group", uselist=False)
+    payments = relationship("Payment", back_populates="group")
+    temporary_card = relationship("TemporaryCard", back_populates="group")
+    items = relationship("Item", back_populates="group")

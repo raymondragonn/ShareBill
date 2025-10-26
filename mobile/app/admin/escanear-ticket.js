@@ -4,6 +4,8 @@ import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Configuración de API según la plataforma
 const getApiUrl = () => {
@@ -24,6 +26,7 @@ const getApiUrl = () => {
 };
 
 export default function EscanearTicketPage() {
+  const router = useRouter();
   const [selectedImage, setSelectedImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -178,14 +181,67 @@ export default function EscanearTicketPage() {
         // Desactivar el loading
         setIsLoading(false);
 
-        Alert.alert(
-          '✅ Éxito', 
-          `Ticket procesado correctamente\n\n` +
-          `🏪 Negocio: ${response.data.nombre_negocio || 'N/A'}\n` +
-          `🆔 ID: ${response.data.ticket_id || 'N/A'}\n` +
-          `📝 Artículos: ${response.data.articulos?.length || 0}\n` +
-          `💰 Total: $${response.data.total?.toFixed(2) || '0.00'}`
-        );
+        // Guardar datos del ticket en AsyncStorage
+        try {
+          await AsyncStorage.setItem('currentTicketData', JSON.stringify(response.data));
+          console.log('💾 Datos del ticket guardados en AsyncStorage');
+          
+          // Verificar que se guardaron correctamente
+          const savedData = await AsyncStorage.getItem('currentTicketData');
+          if (savedData) {
+            console.log('✅ Verificación: Datos guardados correctamente');
+            console.log('📦 Datos guardados:', JSON.parse(savedData));
+          } else {
+            console.error('❌ Error: Los datos no se guardaron correctamente');
+          }
+        } catch (storageError) {
+          console.error('Error guardando datos del ticket:', storageError);
+        }
+
+        // Redireccionar inmediatamente sin alerta
+        console.log('🔄 Redirigiendo inmediatamente a productos...');
+        
+        // Intentar diferentes métodos de navegación
+        try {
+          // Método 1: router.push
+          router.push('/user/productos');
+          console.log('✅ Redirección con router.push ejecutada');
+        } catch (navError) {
+          console.error('❌ Error con router.push:', navError);
+          
+          // Método 2: router.replace como fallback
+          try {
+            router.replace('/user/productos');
+            console.log('✅ Redirección con router.replace ejecutada');
+          } catch (replaceError) {
+            console.error('❌ Error con router.replace:', replaceError);
+          }
+        }
+
+        // Mostrar alerta con opción de redirección manual
+        setTimeout(() => {
+          Alert.alert(
+            '✅ Ticket Procesado', 
+            `Ticket procesado correctamente\n\n` +
+            `🏪 Negocio: ${response.data.nombre_negocio || 'N/A'}\n` +
+            `📝 Artículos: ${response.data.articulos?.length || 0}\n` +
+            `💰 Total: $${response.data.total?.toFixed(2) || '0.00'}\n\n` +
+            `¿Deseas ir a seleccionar productos?`,
+            [
+              {
+                text: 'Cancelar',
+                style: 'cancel'
+              },
+              {
+                text: 'Ir a Productos',
+                onPress: () => {
+                  console.log('🔄 Redirección manual a productos...');
+                  router.push('/user/productos');
+                }
+              }
+            ]
+          );
+        }, 1000);
 
     } catch (error) {
         // Desactivar el loading en caso de error

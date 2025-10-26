@@ -6,12 +6,16 @@ from datetime import datetime
 class Payment(Base):
     __tablename__ = "payments"
     id = Column(Integer, primary_key=True, index=True)
-    group_id = Column(Integer, ForeignKey("group.id"))
+    group_id = Column(Integer, ForeignKey("groups.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
     amount = Column(Float)
+    card_number = Column(String)
     status = Column(String, default="pending")  # pending, completed, failed
     payment_method = Column(String, default="temporary_card")
     created_at = Column(DateTime, default=datetime.utcnow)
+    expiry_date = Column(String)
+    cvc = Column(String)
+    postal_code = Column(String)
     
     # Relaciones
     group = relationship("Group", back_populates="payments")

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.models.payments import Payment
+from app.models.payment import Payment
 from app.models.user import User
 from app.database import get_db
 from pydantic import BaseModel

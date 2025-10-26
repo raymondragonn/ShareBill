@@ -1,24 +1,82 @@
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Animated, Platform, Dimensions } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Animated, Platform, Dimensions, ActivityIndicator } from "react-native";
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import LoadingPayment from '../components/LoadingPayment';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ProductosPage() {
-  const [products, setProducts] = useState([
-    { id: 1, name: 'Hamburguesa', price: 12.50 },
-    { id: 2, name: 'Leche', price: 3.20 },
-    { id: 3, name: 'Limón', price: 1.50 },
-    { id: 4, name: 'Pan', price: 2.80 },
-    { id: 5, name: 'Café', price: 4.50 },
-  ]);
+  const [products, setProducts] = useState([]);
+  const [ticketInfo, setTicketInfo] = useState(null);
+  const [isLoadingTicket, setIsLoadingTicket] = useState(true);
   
   const [selectedProducts, setSelectedProducts] = useState(new Set());
   const [activeTab, setActiveTab] = useState('PRODUCTOS');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [isPaymentCompleted, setIsPaymentCompleted] = useState(false);
   const translateX = useRef(new Animated.Value(0)).current;
+
+  // Procesar datos del ticket cuando lleguen
+  useEffect(() => {
+    const loadTicketData = async () => {
+      console.log('🔄 Iniciando carga de datos del ticket...');
+      setIsLoadingTicket(true);
+      
+      try {
+        // Intentar leer datos del ticket desde AsyncStorage
+        const ticketDataString = await AsyncStorage.getItem('currentTicketData');
+        console.log('📦 Datos encontrados en AsyncStorage:', !!ticketDataString);
+        
+        if (ticketDataString) {
+          const ticketData = JSON.parse(ticketDataString);
+          setTicketInfo(ticketData);
+          
+          // Convertir artículos del ticket a productos para la interfaz
+          const ticketProducts = ticketData.articulos?.map((articulo, index) => ({
+            id: index + 1,
+            name: articulo.descripcion,
+            price: articulo.precio_unitario,
+            quantity: articulo.cantidad,
+            total: articulo.monto_linea
+          })) || [];
+          
+          setProducts(ticketProducts);
+          console.log('🎫 Datos del ticket cargados desde AsyncStorage:', ticketData);
+          console.log('🛒 Productos cargados:', ticketProducts);
+          
+          // Limpiar los datos del ticket después de cargarlos
+          await AsyncStorage.removeItem('currentTicketData');
+          console.log('🗑️ Datos del ticket limpiados de AsyncStorage');
+        } else {
+          // Si no hay datos del ticket, usar productos de ejemplo
+          console.log('📝 No hay datos del ticket, usando productos de ejemplo');
+          setProducts([
+            { id: 1, name: 'Hamburguesa', price: 12.50 },
+            { id: 2, name: 'Leche', price: 3.20 },
+            { id: 3, name: 'Limón', price: 1.50 },
+            { id: 4, name: 'Pan', price: 2.80 },
+            { id: 5, name: 'Café', price: 4.50 },
+          ]);
+        }
+      } catch (error) {
+        console.error('Error cargando datos del ticket:', error);
+        // Si hay error, usar productos de ejemplo
+        setProducts([
+          { id: 1, name: 'Hamburguesa', price: 12.50 },
+          { id: 2, name: 'Leche', price: 3.20 },
+          { id: 3, name: 'Limón', price: 1.50 },
+          { id: 4, name: 'Pan', price: 2.80 },
+          { id: 5, name: 'Café', price: 4.50 },
+        ]);
+      } finally {
+        setIsLoadingTicket(false);
+        console.log('✅ Carga de datos completada');
+      }
+    };
+
+    loadTicketData();
+  }, []);
 
   const toggleProductSelection = (productId) => {
     setSelectedProducts(prev => {
@@ -87,8 +145,101 @@ export default function ProductosPage() {
     setIsPaymentCompleted(true);
   };
 
+  // Función para refrescar datos del ticket
+  const handleRefreshTicketData = async () => {
+    console.log('🔄 Refrescando datos del ticket...');
+    setIsLoadingTicket(true);
+    
+    try {
+      const ticketDataString = await AsyncStorage.getItem('currentTicketData');
+      console.log('📦 Datos encontrados al refrescar:', !!ticketDataString);
+      
+      if (ticketDataString) {
+        const ticketData = JSON.parse(ticketDataString);
+        setTicketInfo(ticketData);
+        
+        const ticketProducts = ticketData.articulos?.map((articulo, index) => ({
+          id: index + 1,
+          name: articulo.descripcion,
+          price: articulo.precio_unitario,
+          quantity: articulo.cantidad,
+          total: articulo.monto_linea
+        })) || [];
+        
+        setProducts(ticketProducts);
+        console.log('🎫 Datos del ticket cargados al refrescar:', ticketData);
+        console.log('🛒 Productos cargados al refrescar:', ticketProducts);
+      } else {
+        console.log('📝 No hay datos del ticket al refrescar');
+      }
+    } catch (error) {
+      console.error('Error refrescando datos del ticket:', error);
+    } finally {
+      setIsLoadingTicket(false);
+    }
+  };
+
+  // Función de prueba para simular datos del ticket
+  const handleTestTicketData = async () => {
+    const testTicketData = {
+      "ticket_id": 2,
+      "nombre_negocio": "TERRAZA SALTILLO",
+      "total": 2149,
+      "articulos": [
+        {
+          "descripcion": "PARRILLADA DOS PERSO",
+          "cantidad": 1,
+          "precio_unitario": 395,
+          "monto_linea": 395
+        },
+        {
+          "descripcion": "REFRESCO (A ELEGIR)",
+          "cantidad": 3,
+          "precio_unitario": 40,
+          "monto_linea": 120
+        },
+        {
+          "descripcion": "HMBURGUESA BAÑADA",
+          "cantidad": 2,
+          "precio_unitario": 190,
+          "monto_linea": 380
+        }
+      ]
+    };
+
+    try {
+      await AsyncStorage.setItem('currentTicketData', JSON.stringify(testTicketData));
+      console.log('🧪 Datos de prueba guardados en AsyncStorage');
+      // Recargar la página para simular la llegada de datos
+      window.location.reload();
+    } catch (error) {
+      console.error('Error guardando datos de prueba:', error);
+    }
+  };
+
   const ProductosContent = () => (
     <View style={styles.tabContent}>
+      {/* Botones de control - solo mostrar si no hay datos del ticket */}
+      {!ticketInfo && (
+        <View style={styles.testButtonContainer}>
+          <TouchableOpacity 
+            style={styles.testButton}
+            onPress={handleTestTicketData}
+          >
+            <Ionicons name="flask" size={20} color="#FFFFFF" />
+            <Text style={styles.testButtonText}>Probar con Datos del Ticket</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.refreshButton}
+            onPress={handleRefreshTicketData}
+          >
+            <Ionicons name="refresh" size={20} color="#FFFFFF" />
+            <Text style={styles.refreshButtonText}>Refrescar Datos</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+      
       <ScrollView style={styles.productsList}>
         <View style={styles.productsGrid}>
           {products.map((product) => {
@@ -119,6 +270,14 @@ export default function ProductosPage() {
                   ]}>
                     ${product.price.toFixed(2)}
                   </Text>
+                  {product.quantity && product.quantity > 1 && (
+                    <Text style={[
+                      styles.productQuantity,
+                      isSelected && styles.productQuantitySelected
+                    ]}>
+                      Cantidad: {product.quantity}
+                    </Text>
+                  )}
                   {isSelected && (
                     <View style={styles.selectedIndicator}>
                       <Ionicons name="checkmark-circle" size={24} color="#007AFF" />
@@ -202,6 +361,27 @@ export default function ProductosPage() {
     );
   }
 
+  // Mostrar indicador de carga mientras se cargan los datos del ticket
+  if (isLoadingTicket) {
+    return (
+      <View style={styles.container}>
+        <LinearGradient
+          colors={['#1e3c72', '#2a5298', '#3b82f6']}
+          style={styles.headerGradient}
+        >
+          <View style={styles.header}>
+            <Text style={styles.title}>Cargando Productos</Text>
+            <Text style={styles.subtitle}>Procesando datos del ticket...</Text>
+          </View>
+        </LinearGradient>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={styles.loadingText}>Cargando productos del ticket...</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {/* Header con gradiente bancario */}
@@ -210,13 +390,20 @@ export default function ProductosPage() {
         style={styles.headerGradient}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Productos</Text>
+          <Text style={styles.title}>
+            {ticketInfo?.nombre_negocio ? `Productos - ${ticketInfo.nombre_negocio}` : 'Productos'}
+          </Text>
           <Text style={styles.subtitle}>
             {activeTab === 'PRODUCTOS' 
               ? 'Selecciona los productos que te corresponden' 
               : 'Revisa los productos seleccionados'
             }
           </Text>
+          {ticketInfo && (
+            <Text style={styles.ticketInfo}>
+              Total del ticket: ${ticketInfo.total?.toFixed(2) || '0.00'}
+            </Text>
+          )}
         </View>
       </LinearGradient>
 
@@ -279,6 +466,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.8)',
     fontWeight: '500',
+  },
+  ticketInfo: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '600',
+    marginTop: 4,
   },
   // Estilos para la barra de navegación
   tabBar: {
@@ -370,6 +563,13 @@ const styles = StyleSheet.create({
     color: '#007AFF',
     textAlign: 'center',
   },
+  productQuantity: {
+    fontSize: 12,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 4,
+    fontWeight: '500',
+  },
   productCardSelected: {
     opacity: 0.4,
     backgroundColor: '#F2F2F7',
@@ -384,6 +584,9 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
   },
   productPriceSelected: {
+    color: '#8E8E93',
+  },
+  productQuantitySelected: {
     color: '#8E8E93',
   },
   selectedIndicator: {
@@ -516,5 +719,53 @@ const styles = StyleSheet.create({
     color: '#8E8E93',
     textAlign: 'center',
     lineHeight: 22,
+  },
+  // Estilos para el indicador de carga
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+  },
+  loadingText: {
+    marginTop: 20,
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  // Estilos para el botón de prueba
+  testButtonContainer: {
+    padding: 20,
+    backgroundColor: '#F8FAFC',
+    gap: 12,
+  },
+  testButton: {
+    backgroundColor: '#10B981',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 8,
+    gap: 8,
+  },
+  testButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  refreshButton: {
+    backgroundColor: '#3B82F6',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 8,
+    gap: 8,
+  },
+  refreshButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

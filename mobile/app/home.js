@@ -89,6 +89,7 @@ export default function HomePage() {
         },
         body: JSON.stringify({
           name: 'Nuevo grupo',
+          admin_id: user?.id, // Incluir el ID del usuario actual como admin
         }),
       });
 

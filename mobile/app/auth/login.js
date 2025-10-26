@@ -153,7 +153,7 @@ export default function LoginPage() {
                     <Text style={styles.label}>Correo electrónico</Text>
                     <TextInput
                         style={styles.input}
-                        placeholder="tu@email.com"
+                        placeholder="Ingresa tu correo electrónico"
                         value={email}
                         onChangeText={setEmail}
                         keyboardType="email-address"
@@ -166,7 +166,7 @@ export default function LoginPage() {
                     <View style={styles.passwordContainer}>
                         <TextInput
                             style={styles.passwordInput}
-                            placeholder="Tu contraseña"
+                            placeholder="Ingresa una contraseña"
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry={!showPassword}

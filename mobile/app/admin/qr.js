@@ -37,6 +37,7 @@ export default function AdminQRPage() {
       if (groupJSON) {
         const group = JSON.parse(groupJSON);
         setGroupData(group);
+        // Cargar miembros inmediatamente después de establecer los datos del grupo
         await loadGroupMembers(group.id);
       } else {
         Alert.alert('Error', 'No se encontraron datos del grupo');
@@ -63,10 +64,41 @@ export default function AdminQRPage() {
         })));
       } else {
         console.warn('Error al cargar miembros: Respuesta no exitosa');
+        // Si no hay miembros en el backend, mostrar al admin como miembro predeterminado
+        if (groupData?.admin_id) {
+          const currentUser = await AsyncStorage.getItem('user');
+          if (currentUser) {
+            const user = JSON.parse(currentUser);
+            setGroupMembers([{
+              id: user.id,
+              name: `${user.nombre} ${user.apellido}`,
+              email: user.email,
+              avatar: user.nombre.charAt(0).toUpperCase(),
+              isAdmin: true
+            }]);
+          }
+        }
       }
     } catch (error) {
       console.error('Error al cargar miembros:', error);
-      // No mostrar alerta para errores de red en la carga automática
+      // Si hay error de red, mostrar al admin como miembro predeterminado
+      if (groupData?.admin_id) {
+        try {
+          const currentUser = await AsyncStorage.getItem('user');
+          if (currentUser) {
+            const user = JSON.parse(currentUser);
+            setGroupMembers([{
+              id: user.id,
+              name: `${user.nombre} ${user.apellido}`,
+              email: user.email,
+              avatar: user.nombre.charAt(0).toUpperCase(),
+              isAdmin: true
+            }]);
+          }
+        } catch (storageError) {
+          console.error('Error al cargar usuario desde storage:', storageError);
+        }
+      }
     }
   };
 
@@ -263,9 +295,15 @@ export default function AdminQRPage() {
               <View style={styles.userDetails}>
                 <View style={styles.nameContainer}>
                   <Text style={styles.userName}>{user.name}</Text>
+                  {user.isAdmin && (
+                    <View style={styles.adminBadge}>
+                      <Ionicons name="shield-checkmark" size={12} color="#C1121F" />
+                      <Text style={styles.adminText}>Admin</Text>
+                    </View>
+                  )}
                 </View>
                 <Text style={styles.userEmail}>{user.email}</Text>
-                <Text style={styles.joinTime}>{user.joinTime}</Text>
+                <Text style={styles.joinTime}>{user.joinTime || 'Administrador'}</Text>
               </View>
             </View>
             <View style={styles.userIndicator}>

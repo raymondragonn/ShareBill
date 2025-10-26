@@ -140,7 +140,7 @@ export default function RegisterPage() {
                 <Text style={styles.label}>Nombre</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="Tu nombre"
+                    placeholder="Ingresa tu(s) nombre(s)"
                     value={formData.nombre}
                     onChangeText={(text) => setFormData({ ...formData, nombre: text })}
                 />
@@ -150,7 +150,7 @@ export default function RegisterPage() {
                 <Text style={styles.label}>Apellido</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="Tu apellido"
+                    placeholder="Ingresa tu(s) apellido(s)"
                     value={formData.apellido}
                     onChangeText={(text) => setFormData({ ...formData, apellido: text })}
                 />
@@ -160,7 +160,7 @@ export default function RegisterPage() {
                 <Text style={styles.label}>Correo</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="tu@email.com"
+                    placeholder="Ingresa tu correo electróncio"
                     value={formData.email}
                     onChangeText={(text) => setFormData({ ...formData, email: text })}
                     keyboardType="email-address"
@@ -173,7 +173,7 @@ export default function RegisterPage() {
                 <View style={styles.passwordContainer}>
                     <TextInput
                         style={styles.passwordInput}
-                        placeholder="Tu contraseña"
+                        placeholder="Crea una contraseña"
                         value={formData.password}
                         onChangeText={(text) => setFormData({ ...formData, password: text })}
                         secureTextEntry={!showPassword}

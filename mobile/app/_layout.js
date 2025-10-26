@@ -16,11 +16,17 @@ export default function TabLayout() {
             try {
                 const user = await AsyncStorage.getItem('user');
                 const inAuthGroup = segments[0] === 'auth';
+                const inUserGroup = segments[0] === 'user';
 
-                if (!user && !inAuthGroup) {
+                console.log('🔍 _layout verificando sesión:', { user: !!user, segments, inAuthGroup, inUserGroup });
+
+                if (!user && !inAuthGroup && !inUserGroup) {
+                    console.log('❌ Sin usuario y fuera de auth/user, redirigiendo a login');
                     router.replace('/auth/login');
                 } else if (user && inAuthGroup) {
-                    router.replace('/home');
+                    // NO redirigir si el usuario está en proceso de registro/login con groupCode
+                    // Dejar que los componentes de auth manejen la redirección
+                    console.log('✅ Usuario en auth, dejando que auth maneje la navegación');
                 }
 
                 setLoggedIn(!!user);
@@ -120,6 +126,7 @@ export default function TabLayout() {
                 />
                 <Tabs.Screen name="auth/login" options={{ href: null }} />
                 <Tabs.Screen name="auth/register" options={{ href: null }} />
+                <Tabs.Screen name="user/waiting-room" options={{ href: null }} />
                 <Tabs.Screen name="user/productos" options={{ href: null }} />
                 <Tabs.Screen name="user/total" options={{ href: null }} />
                 <Tabs.Screen name="admin/pago" options={{ href: null }} />

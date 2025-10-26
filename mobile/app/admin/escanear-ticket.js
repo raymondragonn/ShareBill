@@ -4,6 +4,8 @@ import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
 
 // Configuración de API según la plataforma
 const getApiUrl = () => {
@@ -24,6 +26,7 @@ const getApiUrl = () => {
 };
 
 export default function EscanearTicketPage() {
+  const router = useRouter();
   const [selectedImage, setSelectedImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -175,17 +178,24 @@ export default function EscanearTicketPage() {
         console.log(JSON.stringify(response.data, null, 2));
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
+        // Guardar los datos del recibo en AsyncStorage
+        const receiptInfo = {
+          receipt_id: response.data.ticket_id,
+          store_name: response.data.nombre_negocio,
+          total: response.data.total,
+          articles: response.data.articulos || [],
+          scanned_at: new Date().toISOString()
+        };
+
+        await AsyncStorage.setItem('currentReceipt', JSON.stringify(receiptInfo));
+        console.log('💾 Recibo guardado en AsyncStorage:', receiptInfo);
+
         // Desactivar el loading
         setIsLoading(false);
 
-        Alert.alert(
-          '✅ Éxito', 
-          `Ticket procesado correctamente\n\n` +
-          `🏪 Negocio: ${response.data.nombre_negocio || 'N/A'}\n` +
-          `🆔 ID: ${response.data.ticket_id || 'N/A'}\n` +
-          `📝 Artículos: ${response.data.articulos?.length || 0}\n` +
-          `💰 Total: $${response.data.total?.toFixed(2) || '0.00'}`
-        );
+        // Redirigir automáticamente a la página de productos
+        console.log('🚀 Redirigiendo a productos...');
+        router.push('/user/productos');
 
     } catch (error) {
         // Desactivar el loading en caso de error

@@ -14,3 +14,4 @@ class Receipt(Base):
     
     # Relaciones
     group = relationship("Group", back_populates="receipt")
+    items = relationship("Item", back_populates="receipt")

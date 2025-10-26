@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
-from app.routes import users, payments, tickets
+from app.routes import users, payments, tickets, groups
 
 # Crear tablas
 Base.metadata.create_all(bind=engine)
@@ -21,6 +21,7 @@ app.add_middleware(
 app.include_router(users.router)
 app.include_router(payments.router)
 app.include_router(tickets.router)
+app.include_router(groups.router)
 
 @app.get("/")
 def root():

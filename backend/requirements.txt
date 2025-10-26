@@ -8,3 +8,4 @@ email-validator
 google-generativeai
 pillow
 python-multipart
+qrcode[pil]

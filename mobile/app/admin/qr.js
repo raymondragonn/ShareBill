@@ -1,58 +1,84 @@
-import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView, Animated, Modal, Platform, Dimensions } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView, Animated, Modal, Platform, Dimensions, Image, ActivityIndicator, Share } from "react-native";
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Clipboard from 'expo-clipboard';
 
 export default function AdminQRPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('QR');
   const translateX = useRef(new Animated.Value(0)).current;
-  const [groupCode] = useState("MDVL");
-  const [qrCode] = useState("1838");
+  const [groupData, setGroupData] = useState(null);
+  const [groupMembers, setGroupMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // Datos de ejemplo de usuarios que se han unido al grupo
-  const groupMembers = [
-    {
-      id: 1,
-      name: "María González",
-      email: "maria.gonzalez@email.com",
-      joinTime: "Hace 2 horas",
-      avatar: "M",
-      isAdmin: true
-    },
-    {
-      id: 2,
-      name: "Carlos Rodríguez",
-      email: "carlos.rodriguez@email.com",
-      joinTime: "Hace 1 hora",
-      avatar: "C",
-      isAdmin: false
-    },
-    {
-      id: 3,
-      name: "Ana Martínez",
-      email: "ana.martinez@email.com",
-      joinTime: "Hace 30 minutos",
-      avatar: "A",
-      isAdmin: false
-    },
-    {
-      id: 4,
-      name: "Luis Fernández",
-      email: "luis.fernandez@email.com",
-      joinTime: "Hace 15 minutos",
-      avatar: "L",
-      isAdmin: false
-    }
-  ];
+  useEffect(() => {
+    loadGroupData();
+    // Actualizar miembros cada 5 segundos
+    const interval = setInterval(() => {
+      if (groupData?.id) {
+        loadGroupMembers(groupData.id);
+      }
+    }, 5000);
 
-  const handleShare = () => {
-    Alert.alert('Compartir', 'Código compartido por WhatsApp');
+    return () => clearInterval(interval);
+  }, [groupData?.id]);
+
+  const loadGroupData = async () => {
+    try {
+      const groupJSON = await AsyncStorage.getItem('currentGroup');
+      if (groupJSON) {
+        const group = JSON.parse(groupJSON);
+        setGroupData(group);
+        await loadGroupMembers(group.id);
+      } else {
+        Alert.alert('Error', 'No se encontraron datos del grupo');
+      }
+    } catch (error) {
+      console.error('Error al cargar grupo:', error);
+      Alert.alert('Error', 'Error al cargar la información del grupo');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadGroupMembers = async (groupId) => {
+    try {
+      const response = await fetch(`http://localhost:8000/groups/${groupId}/members`);
+      if (response.ok) {
+        const members = await response.json();
+        setGroupMembers(members.map(member => ({
+          id: member.id,
+          name: `${member.nombre} ${member.apellido}`,
+          email: member.email,
+          avatar: member.nombre.charAt(0).toUpperCase(),
+          isAdmin: member.id === groupData?.admin_id
+        })));
+      }
+    } catch (error) {
+      console.error('Error al cargar miembros:', error);
+    }
+  };
+
+  const handleShare = async () => {
+    if (groupData) {
+      // Crear link de invitación
+      const inviteLink = `http://localhost:8081/auth/register?groupCode=${groupData.join_link}`;
+      
+      try {
+        // Copiar directamente al portapapeles
+        await Clipboard.setStringAsync(inviteLink);
+        Alert.alert('✓ Link copiado', 'Ahora puedes pegarlo en WhatsApp');
+      } catch (error) {
+        Alert.alert('Error', 'No se pudo copiar el link');
+      }
+    }
   };
 
   const handleContinue = () => {
@@ -126,46 +152,70 @@ export default function AdminQRPage() {
     }
   };
 
-  const QRContent = () => (
-    <View style={styles.content}>
-      <View style={styles.scannerContainer}>
-        <View style={styles.scannerFrame}>
-          <View style={styles.qrIconContainer}>
-            <Ionicons name="qr-code" size={80} color="#1E40AF" />
+  const QRContent = () => {
+    if (loading || !groupData) {
+      return (
+        <View style={styles.content}>
+          <ActivityIndicator size="large" color="#1E40AF" />
+          <Text style={styles.loadingText}>Cargando información del grupo...</Text>
+        </View>
+      );
+    }
+
+    return (
+      <ScrollView style={styles.qrScrollView} contentContainerStyle={styles.qrScrollContent}>
+        <View style={styles.groupNameContainer}>
+          <Text style={styles.groupNameLabel}>Grupo:</Text>
+          <Text style={styles.groupNameValue}>{groupData.name}</Text>
+        </View>
+
+        <View style={styles.scannerContainer}>
+          <View style={styles.scannerFrame}>
+            {groupData.qr_code ? (
+              <Image 
+                source={{ uri: groupData.qr_code }} 
+                style={styles.qrImage}
+                resizeMode="contain"
+              />
+            ) : (
+              <View style={styles.qrIconContainer}>
+                <Ionicons name="qr-code" size={80} color="#1E40AF" />
+              </View>
+            )}
           </View>
+          <Text style={styles.scannerLabel}>Código QR del Grupo</Text>
+          <Text style={styles.scannerSubtext}>
+            Comparte este código QR para que otros se unan al grupo
+          </Text>
         </View>
-        <Text style={styles.scannerLabel}>Código QR del Grupo</Text>
-        <Text style={styles.scannerSubtext}>
-          Comparte este código QR para que otros se unan al grupo
-        </Text>
-      </View>
 
-      <View style={styles.divider}>
-        <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>O</Text>
-        <View style={styles.dividerLine} />
-      </View>
-
-      <View style={styles.codeContainer}>
-        <Text style={styles.codeLabel}>Código:</Text>
-        <Text style={styles.codeValue}>{groupCode}</Text>
-      </View>
-
-      <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-        <View style={styles.buttonIconContainer}>
-          <Ionicons name="logo-whatsapp" size={20} color="#FFFFFF" />
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>O</Text>
+          <View style={styles.dividerLine} />
         </View>
-        <Text style={styles.shareButtonText}>Compartir por WhatsApp</Text>
-      </TouchableOpacity>
 
-      <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
-        <View style={styles.buttonIconContainer}>
-          <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
+        <View style={styles.codeContainer}>
+          <Text style={styles.codeLabel}>Código:</Text>
+          <Text style={styles.codeValue}>{groupData.join_link}</Text>
         </View>
-        <Text style={styles.continueButtonText}>CONTINUAR</Text>
-      </TouchableOpacity>
-    </View>
-  );
+
+        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+          <View style={styles.buttonIconContainer}>
+            <Ionicons name="logo-whatsapp" size={20} color="#FFFFFF" />
+          </View>
+          <Text style={styles.shareButtonText}>Compartir por WhatsApp</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
+          <View style={styles.buttonIconContainer}>
+            <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
+          </View>
+          <Text style={styles.continueButtonText}>CONTINUAR</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    );
+  };
 
   const GroupsContent = () => {
 
@@ -226,7 +276,7 @@ export default function AdminQRPage() {
         style={styles.headerGradient}
       >
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Crear Grupo</Text>
+          <Text style={styles.headerTitle}>{groupData ? groupData.name : 'Crear Grupo'}</Text>
         </View>
       </LinearGradient>
 
@@ -432,10 +482,52 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
   },
+  // Estilos para carga
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
   // Estilos para el contenido QR (similar a scan-qr.js)
+  qrScrollView: {
+    flex: 1,
+    width: '100%',
+  },
+  qrScrollContent: {
+    alignItems: 'center',
+    padding: 24,
+  },
+  groupNameContainer: {
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 24,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    alignItems: 'center',
+  },
+  groupNameLabel: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  groupNameValue: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1E40AF',
+    textAlign: 'center',
+  },
   scannerContainer: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: 32,
   },
   scannerFrame: {
     width: 280,
@@ -453,6 +545,10 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: '#1E40AF',
     borderStyle: 'dashed',
+  },
+  qrImage: {
+    width: 250,
+    height: 250,
   },
   qrIconContainer: {
     width: 100,

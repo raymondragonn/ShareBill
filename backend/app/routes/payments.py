@@ -2,39 +2,45 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.models.payment import Payment
 from app.models.user import User
+from app.models.group import Group
 from app.database import get_db
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/payments", tags=["Payments"])
 
 class PaymentCreate(BaseModel):
-    card_number: str
-    expiry_date: str
-    cvc: str
-    postal_code: str
-    user_id: int  # para asociar el pago al usuario
+    group_id: int
+    user_id: int
+    amount: float
+    payment_method: str = "temporary_card"
 
 class PaymentResponse(BaseModel):
     id: int
-    card_number: str
-    expiry_date: str
-    postal_code: str
+    group_id: int
+    user_id: int
+    amount: float
+    status: str
+    payment_method: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 @router.post("/add", response_model=PaymentResponse)
 def add_payment(payment: PaymentCreate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == payment.user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    
+    group = db.query(Group).filter(Group.id == payment.group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
 
     new_payment = Payment(
-        card_number=payment.card_number,
-        expiry_date=payment.expiry_date,
-        cvc=payment.cvc,
-        postal_code=payment.postal_code,
-        user_id=payment.user_id
+        group_id=payment.group_id,
+        user_id=payment.user_id,
+        amount=payment.amount,
+        payment_method=payment.payment_method,
+        status="pending"
     )
 
     db.add(new_payment)

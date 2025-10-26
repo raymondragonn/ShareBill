@@ -8,6 +8,7 @@ class GroupMember(Base):
     id = Column(Integer, primary_key=True, index=True)
     group_id = Column(Integer, ForeignKey("groups.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
+    is_admin = Column(Boolean, default=False)
     joined_at = Column(DateTime, default=datetime.utcnow)
     is_checked_in = Column(Boolean, default=False)
     check_in_time = Column(DateTime, nullable=True)

@@ -11,7 +11,8 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     password = Column(String)
 
-    created_groups = relationship("Group", back_populates="admin")
-    group_memberships = relationship("GroupMember", back_populates="user")
-    user_selections = relationship("UserSelection", back_populates="user")
+    # Relaciones
     payments = relationship("Payment", back_populates="user")
+    created_groups = relationship("Group", back_populates="admin")
+    user_selections = relationship("UserSelection", back_populates="user")
+    group_memberships = relationship("GroupMember", back_populates="user")

@@ -7,7 +7,7 @@ class Group(Base):
     __tablename__ = "groups"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
-    admin_id = Column(Integer, ForeignKey("users.id"))
+    admin_id = Column(Integer, ForeignKey(4"users.id"), nullable=True)
     qr_code = Column(String, unique=True, index=True)
     join_link = Column(String, unique=True, index=True)
     status = Column(String, default="active")  # active, completed, cancelled
@@ -18,6 +18,5 @@ class Group(Base):
     admin = relationship("User", back_populates="created_groups")
     members = relationship("GroupMember", back_populates="group")
     receipt = relationship("Receipt", back_populates="group", uselist=False)
+    temporary_card = relationship("TemporaryCard", back_populates="group", uselist=False)
     payments = relationship("Payment", back_populates="group")
-    temporary_card = relationship("TemporaryCard", back_populates="group")
-    items = relationship("Item", back_populates="group")

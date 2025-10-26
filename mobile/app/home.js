@@ -5,6 +5,7 @@ import { Link } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState, useEffect } from 'react';
+import { API_URL } from "../config";
 
 export default function HomePage() {
   const [user, setUser] = useState(null);
@@ -27,7 +28,7 @@ export default function HomePage() {
 
   const handleCreateGroup = async () => {
     try {
-      const response = await fetch('http://localhost:8000/groups/create', {
+      const response = await fetch(`${API_URL}/groups/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

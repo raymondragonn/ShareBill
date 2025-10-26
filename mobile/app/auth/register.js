@@ -105,9 +105,9 @@ export default function RegisterPage() {
                     }
                 }
                 
-                console.log('⚠️ No hay groupCode, continuando al paso 2');
+                console.log('⚠️ No hay groupCode, redirigiendo a home');
                 Alert.alert("Éxito", `Usuario ${data.nombre} registrado`);
-                setStep(2);
+                router.replace("/home");
 
             } catch (error) {
                 Alert.alert("Error", "No se pudo conectar con el servidor");

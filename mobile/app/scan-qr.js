@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, TouchableOpacity, Alert, Platform, Dimensions, 
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 
 export default function ScanQRPage() {
@@ -16,7 +16,7 @@ export default function ScanQRPage() {
 
   const hasPermission = permission?.granted;
 
-  const handleBarCodeScanned = async ({ type, data }) => {
+  const handleBarCodeScanned = useCallback(async ({ type, data }) => {
     setScanned(true);
     setLoading(true);
     
@@ -35,7 +35,7 @@ export default function ScanQRPage() {
       setScanned(false);
       Alert.alert('Error', 'No se pudo procesar el código QR. Intenta de nuevo.');
     }
-  };
+  }, [router]);
 
   const handleManualSubmit = useCallback(async () => {
     if (!manualCode.trim()) {
@@ -75,7 +75,7 @@ export default function ScanQRPage() {
     }
   }, [hasPermission, cameraActive]);
 
-  const Content = () => {
+  const content = useMemo(() => {
     if (!permission) {
       return (
         <View style={styles.content}>
@@ -196,7 +196,7 @@ export default function ScanQRPage() {
         </View>
       </ScrollView>
     );
-  };
+  }, [permission, hasPermission, loading, cameraActive, scanned, manualCode, toggleCamera, handleManualSubmit, requestPermission, handleBarCodeScanned]);
 
   return (
     <View style={styles.container}>
@@ -212,7 +212,7 @@ export default function ScanQRPage() {
 
       {/* Contenido */}
       <View style={styles.content}>
-        <Content />
+        {content}
       </View>
     </View>
   );

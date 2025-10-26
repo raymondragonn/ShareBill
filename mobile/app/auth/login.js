@@ -1,9 +1,11 @@
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, Platform, Dimensions } from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Platform, Dimensions, Image } from "react-native";
 import { useState, useEffect } from "react";
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from 'expo-linear-gradient';
+import Toast from '../components/Toast';
+import { useToast } from '../hooks/useToast';
 import { API_URL } from "../../config";
 
 export default function LoginPage() {
@@ -12,6 +14,7 @@ export default function LoginPage() {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [groupCode, setGroupCode] = useState(null);
+    const { toast, success, error, warning, hideToast } = useToast();
 
     useEffect(() => {
         // Detectar si viene de un link de invitación
@@ -45,7 +48,7 @@ export default function LoginPage() {
 
     const handleLogin = async () => {
         if (!email || !password) {
-            Alert.alert('Error', 'Por favor completa todos los campos');
+            error('Por favor completa todos los campos');
             return;
         }
 
@@ -59,7 +62,7 @@ export default function LoginPage() {
             const data = await response.json();
 
             if (!response.ok) {
-                Alert.alert("Error", data.detail || "Credenciales inválidas");
+                error(data.detail || "Credenciales inválidas");
                 return;
             }
 
@@ -77,31 +80,37 @@ export default function LoginPage() {
                     console.log('Respuesta del servidor:', joinResponse.status, joinData);
                     
                     if (joinResponse.ok) {
-                        Alert.alert("¡Bienvenido!", `Te has unido al grupo exitosamente`);
+                        success(`Te has unido al grupo exitosamente`);
                     } else {
                         console.error('Error al unirse:', joinData);
-                        Alert.alert("Aviso", "Ya estás en este grupo o hubo un problema al unirte");
+                        warning("Ya estás en este grupo o hubo un problema al unirte");
                     }
                     
                     // Redirigir SIEMPRE a waiting room si hay groupCode
-                    router.replace(`/user/waiting-room?code=${groupCode}`);
+                    setTimeout(() => {
+                        router.replace(`/user/waiting-room?code=${groupCode}`);
+                    }, 1500);
                     return;
                     
-                } catch (error) {
-                    console.error('Error al unirse al grupo:', error);
-                    Alert.alert("Error", "No se pudo conectar con el servidor del grupo");
+                } catch (err) {
+                    console.error('Error al unirse al grupo:', err);
+                    error("No se pudo conectar con el servidor del grupo");
                     // Aún así redirigir a waiting room
-                    router.replace(`/user/waiting-room?code=${groupCode}`);
+                    setTimeout(() => {
+                        router.replace(`/user/waiting-room?code=${groupCode}`);
+                    }, 1500);
                     return;
                 }
             }
             
-            Alert.alert("Bienvenido", `Hola ${data.nombre}`);
-            router.replace("/home"); // ✅ redirige al Home
+            success(`¡Bienvenido ${data.nombre}!`);
+            setTimeout(() => {
+                router.replace("/home");
+            }, 1500);
 
-        } catch (error) {
-            console.error(error);
-            Alert.alert("Error", "No se pudo conectar con el servidor");
+        } catch (err) {
+            console.error(err);
+            error("No se pudo conectar con el servidor");
         }
     };
 
@@ -116,12 +125,24 @@ export default function LoginPage() {
 
     return (
         <View style={styles.container}>
+            <Toast
+                visible={toast.visible}
+                message={toast.message}
+                type={toast.type}
+                onHide={hideToast}
+                duration={toast.duration}
+            />
             {/* Header con gradiente bancario */}
             <LinearGradient
                 colors={['#1e3c72', '#2a5298', '#3b82f6']}
                 style={styles.headerGradient}
             >
                 <View style={styles.header}>
+                    <Image 
+                        source={require('../../assets/LogoMarca.jpeg')} 
+                        style={styles.logo}
+                        resizeMode="contain"
+                    />
                     <Text style={styles.title}>ShareBill</Text>
                     <Text style={styles.subtitle}>Comparte gastos fácilmente</Text>
                 </View>
@@ -193,6 +214,17 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     paddingHorizontal: 24,
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    marginBottom: 20,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   title: {
     fontSize: 36,

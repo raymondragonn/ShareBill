@@ -392,7 +392,7 @@ export default function WalletPage() {
                                 </View>
 
                                 <View style={styles.rowInputs}>
-                                    <View style={[styles.inputWrapper, { flex: 1, marginRight: 8 }]}>
+                                    <View style={[styles.inputWrapper, { flex: 1 }]}>
                                         <Ionicons name="calendar" size={20} color="#6B7280" style={styles.inputIcon} />
                                         <TextInput
                                             style={styles.modalInput}
@@ -404,7 +404,7 @@ export default function WalletPage() {
                                             placeholderTextColor="#9CA3AF"
                                         />
                                     </View>
-                                    <View style={[styles.inputWrapper, { flex: 1, marginLeft: 8 }]}>
+                                    <View style={[styles.inputWrapper, { flex: 1 }]}>
                                         <Ionicons name="shield-checkmark" size={20} color="#6B7280" style={styles.inputIcon} />
                                         <TextInput
                                             style={styles.modalInput}
@@ -508,9 +508,8 @@ const styles = StyleSheet.create({
     modalOverlay: { 
         flex: 1, 
         backgroundColor: "rgba(0,0,0,0.6)", 
-        justifyContent: "center", 
-        alignItems: "center", 
-        padding: 20 
+        justifyContent: "flex-end", 
+        alignItems: "center",
     },
     modalContent: { 
         backgroundColor: "#fff", 
@@ -526,21 +525,21 @@ const styles = StyleSheet.create({
     },
     addModalContent: { 
         backgroundColor: "#fff", 
-        borderRadius: 24, 
-        width: "100%", 
-        maxWidth: 420,
-        maxHeight: "90%",
+        borderTopLeftRadius: 24, 
+        borderTopRightRadius: 24,
+        width: "100%",
+        maxHeight: Platform.OS === 'ios' ? "92%" : "95%",
+        paddingBottom: Platform.OS === 'ios' ? 20 : 0,
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 15 },
         shadowOpacity: 0.3,
         shadowRadius: 25,
         elevation: 20,
         overflow: 'hidden',
     },
     modalHeaderGradient: {
-        paddingTop: 20,
-        paddingBottom: 20,
-        paddingHorizontal: 24,
+        paddingTop: Platform.OS === 'ios' ? 50 : 20,
+        paddingBottom: 18,
+        paddingHorizontal: 20,
     },
     modalHeader: {
         flexDirection: 'row',
@@ -562,7 +561,7 @@ const styles = StyleSheet.create({
         marginRight: 12,
     },
     modalTitle: { 
-        fontSize: 22, 
+        fontSize: 18, 
         fontWeight: "700", 
         color: "#FFFFFF",
         flex: 1,
@@ -577,17 +576,20 @@ const styles = StyleSheet.create({
     },
     modalBody: {
         flex: 1,
-        padding: 24,
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 12,
     },
     inputGroup: {
-        marginBottom: 24,
+        marginBottom: 20,
     },
     inputGroupTitle: {
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: '600',
         color: '#374151',
-        marginBottom: 16,
-        marginTop: 8,
+        marginBottom: 12,
+        marginTop: 4,
+        paddingLeft: 4,
     },
     inputWrapper: {
         flexDirection: 'row',
@@ -596,8 +598,8 @@ const styles = StyleSheet.create({
         borderWidth: 1.5,
         borderColor: '#E5E7EB',
         borderRadius: 12,
-        marginBottom: 12,
-        paddingHorizontal: 16,
+        marginBottom: 10,
+        paddingHorizontal: 14,
         paddingVertical: 4,
     },
     inputIcon: {
@@ -605,8 +607,8 @@ const styles = StyleSheet.create({
     },
     modalInput: {
         flex: 1,
-        paddingVertical: 16,
-        fontSize: 16,
+        paddingVertical: 14,
+        fontSize: 15,
         color: '#1F2937',
         fontWeight: '500',
     },
@@ -617,41 +619,39 @@ const styles = StyleSheet.create({
         borderWidth: 1.5,
         borderColor: '#D1D5DB',
         borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 16,
+        paddingHorizontal: 14,
+        paddingVertical: 14,
     },
     rowInputs: {
         flexDirection: 'row',
-        marginTop: 8,
+        marginTop: 4,
+        gap: 12,
     },
     modalFooter: {
         flexDirection: 'row',
-        padding: 24,
+        paddingHorizontal: 20,
         paddingTop: 16,
+        paddingBottom: Platform.OS === 'ios' ? 24 : 16,
         backgroundColor: '#F9FAFB',
         borderTopWidth: 1,
         borderTopColor: '#E5E7EB',
     },
     input: { borderWidth: 1, borderColor: "#ccc", borderRadius: 10, padding: 12, marginBottom: 12, fontSize: 16 },
     inputContainer: { marginBottom: 12 },
-    inputLabel: { fontSize: 16, fontWeight: "600", color: "#374151", marginBottom: 8 },
+    inputLabel: { fontSize: 13, fontWeight: "600", color: "#6B7280", marginBottom: 8, paddingLeft: 4 },
     userNameDisplay: { 
-        backgroundColor: "#F3F4F6", 
-        borderWidth: 1, 
-        borderColor: "#D1D5DB", 
-        borderRadius: 10, 
-        padding: 12, 
-        fontSize: 16, 
+        fontSize: 15, 
         color: "#1F2937",
-        fontWeight: "500"
+        fontWeight: "600",
+        flex: 1,
     },
     modalButton: { 
         flexDirection: "row", 
         alignItems: "center", 
         justifyContent: "center", 
         flex: 1, 
-        paddingVertical: 16, 
-        paddingHorizontal: 20, 
+        paddingVertical: 14, 
+        paddingHorizontal: 16, 
         borderRadius: 12, 
         marginHorizontal: 6,
         shadowColor: "#000",
@@ -659,6 +659,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.15,
         shadowRadius: 8,
         elevation: 6,
+        gap: 6,
     },
     saveButton: { 
         backgroundColor: "#1E40AF",
@@ -679,14 +680,12 @@ const styles = StyleSheet.create({
     saveText: { 
         color: "#FFFFFF", 
         fontWeight: "700", 
-        fontSize: 16,
-        marginLeft: 8 
+        fontSize: 15,
     },
     cancelText: { 
         color: "#FFFFFF", 
         fontWeight: "700", 
-        fontSize: 16,
-        marginLeft: 8 
+        fontSize: 15,
     },
     setDefaultButton: { backgroundColor: "#FFF8DC", marginBottom: 10 },
     deleteButton: { backgroundColor: "#FFEBEE" },

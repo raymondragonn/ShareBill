@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     StyleSheet,
     Text,
@@ -13,24 +13,11 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function WalletPage() {
-    const [cards, setCards] = useState([
-        {
-            id: 1,
-            type: "credit",
-            bank: "Capital One",
-            number: "**** **** **** 1234",
-            name: "Juan Pérez",
-            expiry: "12/26",
-            cvv: "***",
-            isDefault: true,
-            cardName: "VENTURE",
-            cardColor: "blue",
-            pattern: "waves",
-        },
-    ]);
-
+    const [user, setUser] = useState(null);
+    const [cards, setCards] = useState([]);
     const [selectedCard, setSelectedCard] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
@@ -44,6 +31,42 @@ export default function WalletPage() {
         type: "credit",
     });
 
+    // Cargar datos del usuario al montar el componente
+    useEffect(() => {
+        const loadUser = async () => {
+            try {
+                const storedUser = await AsyncStorage.getItem("user");
+                if (storedUser) {
+                    const userData = JSON.parse(storedUser);
+                    setUser(userData);
+                    console.log("Usuario cargado:", userData);
+                    
+                    // Agregar una tarjeta de ejemplo con el nombre del usuario
+                    const userName = userData.nombre && userData.apellido 
+                        ? `${userData.nombre} ${userData.apellido}` 
+                        : userData.nombre || userData.name || 'Usuario';
+                    
+                    setCards([{
+                        id: 1,
+                        type: "credit",
+                        bank: "Capital One",
+                        number: "**** **** **** 1234",
+                        name: userName,
+                        expiry: "12/26",
+                        cvv: "***",
+                        isDefault: true,
+                        cardName: "VENTURE",
+                        cardColor: "blue",
+                        pattern: "waves",
+                    }]);
+                }
+            } catch (error) {
+                console.error("Error cargando usuario:", error);
+            }
+        };
+        loadUser();
+    }, []);
+
     const handleAddCard = () => setShowAddModal(true);
 
     const handleSaveCard = () => {
@@ -51,7 +74,6 @@ export default function WalletPage() {
             !newCard.bank ||
             !newCard.cardName ||
             !newCard.number ||
-            !newCard.name ||
             !newCard.expiry ||
             !newCard.cvv
         ) {
@@ -60,10 +82,18 @@ export default function WalletPage() {
         }
 
         const formattedNumber = "**** **** **** " + newCard.number.slice(-4);
+        
+        // Usar el nombre del usuario actual si está disponible
+        const cardHolderName = user 
+            ? (user.nombre && user.apellido 
+                ? `${user.nombre} ${user.apellido}` 
+                : user.nombre || user.name || 'Usuario')
+            : newCard.name || 'Usuario';
 
         const newCardData = {
             id: cards.length + 1,
             ...newCard,
+            name: cardHolderName,
             number: formattedNumber,
             isDefault: false,
             cardColor: "blue",
@@ -229,9 +259,39 @@ export default function WalletPage() {
                             </TouchableOpacity>
                         </View>
 
-                        <Text style={styles.cardPreviewText}>
-                            {selectedCard?.cardName} •••• {selectedCard?.number.slice(-4)}
-                        </Text>
+                        <View style={styles.cardPreviewContainer}>
+                            <View style={styles.cardPreviewHeader}>
+                                <Ionicons name="card" size={20} color="#1E40AF" />
+                                <Text style={styles.cardPreviewTitle}>Vista Previa</Text>
+                            </View>
+                            <View style={[
+                                styles.cardPreview,
+                                selectedCard?.cardColor === "blue" ? styles.blueCardPreview :
+                                selectedCard?.cardColor === "gray" ? styles.grayCardPreview :
+                                styles.orangeCardPreview
+                            ]}>
+                                <View style={styles.cardPreviewContent}>
+                                    <View style={styles.cardPreviewTop}>
+                                        <View style={styles.cardPreviewChip} />
+                                        <Text style={styles.cardPreviewBank}>{selectedCard?.bank}</Text>
+                                    </View>
+                                    <View style={styles.cardPreviewMiddle}>
+                                        <Text style={styles.cardPreviewCardName}>{selectedCard?.cardName}</Text>
+                                        <Text style={styles.cardPreviewNumber}>{selectedCard?.number}</Text>
+                                    </View>
+                                    <View style={styles.cardPreviewBottom}>
+                                        <View style={styles.cardPreviewHolder}>
+                                            <Text style={styles.cardPreviewHolderLabel}>CARD HOLDER</Text>
+                                            <Text style={styles.cardPreviewHolderName}>{selectedCard?.name}</Text>
+                                        </View>
+                                        <View style={styles.cardPreviewExpiry}>
+                                            <Text style={styles.cardPreviewExpiryLabel}>EXPIRES</Text>
+                                            <Text style={styles.cardPreviewExpiryDate}>{selectedCard?.expiry}</Text>
+                                        </View>
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
 
                         <TouchableOpacity
                             style={[styles.modalButton, styles.setDefaultButton]}
@@ -256,70 +316,126 @@ export default function WalletPage() {
             <Modal visible={showAddModal} transparent animationType="slide">
                 <View style={styles.modalOverlay}>
                     <View style={styles.addModalContent}>
-                        <Text style={styles.modalTitle}>Agregar Nueva Tarjeta</Text>
+                        <LinearGradient
+                            colors={['#1e3c72', '#2a5298']}
+                            style={styles.modalHeaderGradient}
+                        >
+                            <View style={styles.modalHeader}>
+                                <View style={styles.modalHeaderLeft}>
+                                    <View style={styles.modalIconContainer}>
+                                        <Ionicons name="card" size={24} color="#FFFFFF" />
+                                    </View>
+                                    <Text style={styles.modalTitle}>Agregar Nueva Tarjeta</Text>
+                                </View>
+                                <TouchableOpacity 
+                                    style={styles.closeButton}
+                                    onPress={() => setShowAddModal(false)}
+                                >
+                                    <Ionicons name="close" size={24} color="#FFFFFF" />
+                                </TouchableOpacity>
+                            </View>
+                        </LinearGradient>
 
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Banco"
-                            value={newCard.bank}
-                            onChangeText={(text) => setNewCard({ ...newCard, bank: text })}
-                        />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Nombre de la tarjeta"
-                            value={newCard.cardName}
-                            onChangeText={(text) => setNewCard({ ...newCard, cardName: text })}
-                        />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Número de tarjeta"
-                            value={newCard.number}
-                            onChangeText={(text) => setNewCard({ ...newCard, number: text })}
-                            keyboardType="numeric"
-                            maxLength={16}
-                        />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Titular"
-                            value={newCard.name}
-                            onChangeText={(text) => setNewCard({ ...newCard, name: text })}
-                        />
+                        <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.inputGroupTitle}>Información del Banco</Text>
+                                <View style={styles.inputWrapper}>
+                                    <Ionicons name="business" size={20} color="#6B7280" style={styles.inputIcon} />
+                                    <TextInput
+                                        style={styles.modalInput}
+                                        placeholder="Nombre del banco"
+                                        value={newCard.bank}
+                                        onChangeText={(text) => setNewCard({ ...newCard, bank: text })}
+                                        placeholderTextColor="#9CA3AF"
+                                    />
+                                </View>
+                                <View style={styles.inputWrapper}>
+                                    <Ionicons name="card" size={20} color="#6B7280" style={styles.inputIcon} />
+                                    <TextInput
+                                        style={styles.modalInput}
+                                        placeholder="Nombre de la tarjeta"
+                                        value={newCard.cardName}
+                                        onChangeText={(text) => setNewCard({ ...newCard, cardName: text })}
+                                        placeholderTextColor="#9CA3AF"
+                                    />
+                                </View>
+                            </View>
 
-                        <View style={{ flexDirection: "row", gap: 10 }}>
-                            <TextInput
-                                style={[styles.input, { flex: 1 }]}
-                                placeholder="Expiración (MM/AA)"
-                                value={newCard.expiry}
-                                onChangeText={(text) => setNewCard({ ...newCard, expiry: text })}
-                                keyboardType="numeric"
-                                maxLength={5}
-                            />
-                            <TextInput
-                                style={[styles.input, { flex: 1 }]}
-                                placeholder="CVV"
-                                value={newCard.cvv}
-                                onChangeText={(text) => setNewCard({ ...newCard, cvv: text })}
-                                keyboardType="numeric"
-                                secureTextEntry
-                                maxLength={3}
-                            />
-                        </View>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.inputGroupTitle}>Datos de la Tarjeta</Text>
+                                <View style={styles.inputWrapper}>
+                                    <Ionicons name="card-outline" size={20} color="#6B7280" style={styles.inputIcon} />
+                                    <TextInput
+                                        style={styles.modalInput}
+                                        placeholder="Número de tarjeta"
+                                        value={newCard.number}
+                                        onChangeText={(text) => setNewCard({ ...newCard, number: text })}
+                                        keyboardType="numeric"
+                                        maxLength={16}
+                                        placeholderTextColor="#9CA3AF"
+                                    />
+                                </View>
+                                
+                                <View style={styles.inputContainer}>
+                                    <Text style={styles.inputLabel}>Titular de la Tarjeta</Text>
+                                    <View style={styles.userNameContainer}>
+                                        <Ionicons name="person" size={20} color="#6B7280" style={styles.inputIcon} />
+                                        <Text style={styles.userNameDisplay}>
+                                            {user 
+                                                ? (user.nombre && user.apellido 
+                                                    ? `${user.nombre} ${user.apellido}` 
+                                                    : user.nombre || user.name || 'Usuario')
+                                                : 'Cargando...'
+                                            }
+                                        </Text>
+                                    </View>
+                                </View>
 
-                        <View style={{ flexDirection: "row", marginTop: 10 }}>
-                            <TouchableOpacity
-                                style={[styles.modalButton, styles.saveButton]}
-                                onPress={handleSaveCard}
-                            >
-                                <Ionicons name="save" size={20} color="#fff" />
-                                <Text style={styles.saveText}>Guardar</Text>
-                            </TouchableOpacity>
+                                <View style={styles.rowInputs}>
+                                    <View style={[styles.inputWrapper, { flex: 1, marginRight: 8 }]}>
+                                        <Ionicons name="calendar" size={20} color="#6B7280" style={styles.inputIcon} />
+                                        <TextInput
+                                            style={styles.modalInput}
+                                            placeholder="MM/AA"
+                                            value={newCard.expiry}
+                                            onChangeText={(text) => setNewCard({ ...newCard, expiry: text })}
+                                            keyboardType="numeric"
+                                            maxLength={5}
+                                            placeholderTextColor="#9CA3AF"
+                                        />
+                                    </View>
+                                    <View style={[styles.inputWrapper, { flex: 1, marginLeft: 8 }]}>
+                                        <Ionicons name="shield-checkmark" size={20} color="#6B7280" style={styles.inputIcon} />
+                                        <TextInput
+                                            style={styles.modalInput}
+                                            placeholder="CVV"
+                                            value={newCard.cvv}
+                                            onChangeText={(text) => setNewCard({ ...newCard, cvv: text })}
+                                            keyboardType="numeric"
+                                            secureTextEntry
+                                            maxLength={3}
+                                            placeholderTextColor="#9CA3AF"
+                                        />
+                                    </View>
+                                </View>
+                            </View>
+                        </ScrollView>
 
+                        <View style={styles.modalFooter}>
                             <TouchableOpacity
                                 style={[styles.modalButton, styles.cancelButton]}
                                 onPress={() => setShowAddModal(false)}
                             >
-                                <Ionicons name="close" size={20} color="#fff" />
+                                <Ionicons name="close" size={20} color="#FFFFFF" />
                                 <Text style={styles.cancelText}>Cancelar</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.saveButton]}
+                                onPress={handleSaveCard}
+                            >
+                                <Ionicons name="checkmark" size={20} color="#FFFFFF" />
+                                <Text style={styles.saveText}>Agregar Tarjeta</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -389,20 +505,289 @@ const styles = StyleSheet.create({
     cardHolderName: { fontSize: 14, fontWeight: "bold", color: "#FFFFFF" },
     expiryLabel: { fontSize: 9, color: "#E5E7EB" },
     expiryDate: { fontSize: 14, fontWeight: "bold", color: "#FFFFFF" },
-    modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: 20 },
-    modalContent: { backgroundColor: "#fff", borderRadius: 16, padding: 20, width: "100%", maxWidth: 400 },
-    addModalContent: { backgroundColor: "#fff", borderRadius: 16, padding: 20, width: "100%", maxWidth: 400 },
-    modalTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 20, textAlign: "center" },
+    modalOverlay: { 
+        flex: 1, 
+        backgroundColor: "rgba(0,0,0,0.6)", 
+        justifyContent: "center", 
+        alignItems: "center", 
+        padding: 20 
+    },
+    modalContent: { 
+        backgroundColor: "#fff", 
+        borderRadius: 20, 
+        padding: 20, 
+        width: "100%", 
+        maxWidth: 400,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.25,
+        shadowRadius: 20,
+        elevation: 15,
+    },
+    addModalContent: { 
+        backgroundColor: "#fff", 
+        borderRadius: 24, 
+        width: "100%", 
+        maxWidth: 420,
+        maxHeight: "90%",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 15 },
+        shadowOpacity: 0.3,
+        shadowRadius: 25,
+        elevation: 20,
+        overflow: 'hidden',
+    },
+    modalHeaderGradient: {
+        paddingTop: 20,
+        paddingBottom: 20,
+        paddingHorizontal: 24,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    modalHeaderLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    modalIconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 12,
+    },
+    modalTitle: { 
+        fontSize: 22, 
+        fontWeight: "700", 
+        color: "#FFFFFF",
+        flex: 1,
+    },
+    closeButton: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    modalBody: {
+        flex: 1,
+        padding: 24,
+    },
+    inputGroup: {
+        marginBottom: 24,
+    },
+    inputGroupTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#374151',
+        marginBottom: 16,
+        marginTop: 8,
+    },
+    inputWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F9FAFB',
+        borderWidth: 1.5,
+        borderColor: '#E5E7EB',
+        borderRadius: 12,
+        marginBottom: 12,
+        paddingHorizontal: 16,
+        paddingVertical: 4,
+    },
+    inputIcon: {
+        marginRight: 12,
+    },
+    modalInput: {
+        flex: 1,
+        paddingVertical: 16,
+        fontSize: 16,
+        color: '#1F2937',
+        fontWeight: '500',
+    },
+    userNameContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F3F4F6',
+        borderWidth: 1.5,
+        borderColor: '#D1D5DB',
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        paddingVertical: 16,
+    },
+    rowInputs: {
+        flexDirection: 'row',
+        marginTop: 8,
+    },
+    modalFooter: {
+        flexDirection: 'row',
+        padding: 24,
+        paddingTop: 16,
+        backgroundColor: '#F9FAFB',
+        borderTopWidth: 1,
+        borderTopColor: '#E5E7EB',
+    },
     input: { borderWidth: 1, borderColor: "#ccc", borderRadius: 10, padding: 12, marginBottom: 12, fontSize: 16 },
-    modalButton: { flexDirection: "row", alignItems: "center", justifyContent: "center", flex: 1, padding: 14, borderRadius: 10, marginHorizontal: 5 },
-    saveButton: { backgroundColor: "#1E40AF" },
-    cancelButton: { backgroundColor: "#9CA3AF" },
-    saveText: { color: "#fff", fontWeight: "bold", marginLeft: 8 },
-    cancelText: { color: "#fff", fontWeight: "bold", marginLeft: 8 },
+    inputContainer: { marginBottom: 12 },
+    inputLabel: { fontSize: 16, fontWeight: "600", color: "#374151", marginBottom: 8 },
+    userNameDisplay: { 
+        backgroundColor: "#F3F4F6", 
+        borderWidth: 1, 
+        borderColor: "#D1D5DB", 
+        borderRadius: 10, 
+        padding: 12, 
+        fontSize: 16, 
+        color: "#1F2937",
+        fontWeight: "500"
+    },
+    modalButton: { 
+        flexDirection: "row", 
+        alignItems: "center", 
+        justifyContent: "center", 
+        flex: 1, 
+        paddingVertical: 16, 
+        paddingHorizontal: 20, 
+        borderRadius: 12, 
+        marginHorizontal: 6,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        elevation: 6,
+    },
+    saveButton: { 
+        backgroundColor: "#1E40AF",
+        shadowColor: "#1E40AF",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 8,
+    },
+    cancelButton: { 
+        backgroundColor: "#6B7280",
+        shadowColor: "#6B7280",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 6,
+    },
+    saveText: { 
+        color: "#FFFFFF", 
+        fontWeight: "700", 
+        fontSize: 16,
+        marginLeft: 8 
+    },
+    cancelText: { 
+        color: "#FFFFFF", 
+        fontWeight: "700", 
+        fontSize: 16,
+        marginLeft: 8 
+    },
     setDefaultButton: { backgroundColor: "#FFF8DC", marginBottom: 10 },
     deleteButton: { backgroundColor: "#FFEBEE" },
     setDefaultText: { color: "#B8860B", fontWeight: "600", marginLeft: 8 },
     deleteText: { color: "#FF3B30", fontWeight: "600", marginLeft: 8 },
+    
+    // Estilos para el preview de tarjeta
+    cardPreviewContainer: {
+        marginBottom: 24,
+    },
+    cardPreviewHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    cardPreviewTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#374151',
+        marginLeft: 8,
+    },
+    cardPreview: {
+        borderRadius: 12,
+        padding: 16,
+        aspectRatio: 1.6,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        elevation: 6,
+    },
+    blueCardPreview: { backgroundColor: "#1E3A8A" },
+    grayCardPreview: { backgroundColor: "#374151" },
+    orangeCardPreview: { backgroundColor: "#DC2626" },
+    cardPreviewContent: {
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+    cardPreviewTop: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+    },
+    cardPreviewChip: {
+        width: 24,
+        height: 18,
+        backgroundColor: "#C0C0C0",
+        borderRadius: 3,
+    },
+    cardPreviewBank: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+    },
+    cardPreviewMiddle: {
+        alignItems: 'center',
+        marginVertical: 8,
+    },
+    cardPreviewCardName: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+        marginBottom: 4,
+    },
+    cardPreviewNumber: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+        letterSpacing: 1,
+    },
+    cardPreviewBottom: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
+    },
+    cardPreviewHolder: {
+        flex: 1,
+    },
+    cardPreviewHolderLabel: {
+        fontSize: 8,
+        color: 'rgba(255, 255, 255, 0.7)',
+        marginBottom: 2,
+    },
+    cardPreviewHolderName: {
+        fontSize: 10,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+    },
+    cardPreviewExpiry: {
+        alignItems: 'flex-end',
+    },
+    cardPreviewExpiryLabel: {
+        fontSize: 8,
+        color: 'rgba(255, 255, 255, 0.7)',
+        marginBottom: 2,
+    },
+    cardPreviewExpiryDate: {
+        fontSize: 10,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+    },
     infoSection: { marginTop: 20 },
     infoCard: { flexDirection: "row", alignItems: "center", backgroundColor: "#E3F2FD", padding: 16, borderRadius: 12 },
     infoText: { fontSize: 14, color: "#1976D2", marginLeft: 8, flex: 1 },

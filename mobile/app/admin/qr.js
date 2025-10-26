@@ -164,10 +164,6 @@ export default function AdminQRPage() {
 
     return (
       <ScrollView style={styles.qrScrollView} contentContainerStyle={styles.qrScrollContent}>
-        <View style={styles.groupNameContainer}>
-          <Text style={styles.groupNameLabel}>Grupo:</Text>
-          <Text style={styles.groupNameValue}>{groupData.name}</Text>
-        </View>
 
         <View style={styles.scannerContainer}>
           <View style={styles.scannerFrame}>
@@ -196,16 +192,14 @@ export default function AdminQRPage() {
         </View>
 
         <View style={styles.codeContainer}>
-          <Text style={styles.codeLabel}>Código:</Text>
-          <Text style={styles.codeValue}>{groupData.join_link}</Text>
-        </View>
-
-        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-          <View style={styles.buttonIconContainer}>
-            <Ionicons name="logo-whatsapp" size={20} color="#FFFFFF" />
+          <View style={styles.codeInfo}>
+            <Text style={styles.codeLabel}>Código:</Text>
+            <Text style={styles.codeValue}>{groupData.join_link}</Text>
           </View>
-          <Text style={styles.shareButtonText}>Compartir por WhatsApp</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+            <Ionicons name="logo-whatsapp" size={20} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
           <View style={styles.buttonIconContainer}>
@@ -527,7 +521,7 @@ const styles = StyleSheet.create({
   },
   scannerContainer: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 16,
   },
   scannerFrame: {
     width: 280,
@@ -575,7 +569,7 @@ const styles = StyleSheet.create({
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 32,
+    marginVertical: 16,
     width: '100%',
   },
   dividerLine: {
@@ -592,6 +586,7 @@ const styles = StyleSheet.create({
   codeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#FFFFFF',
     padding: 20,
     borderRadius: 16,
@@ -604,6 +599,11 @@ const styles = StyleSheet.create({
     elevation: 6,
     borderWidth: 1,
     borderColor: '#E5E7EB',
+  },
+  codeInfo: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   codeLabel: {
     fontSize: 16,
@@ -618,23 +618,17 @@ const styles = StyleSheet.create({
   },
   shareButton: {
     backgroundColor: '#25D366',
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 20,
-    width: '100%',
+    padding: 12,
+    borderRadius: 12,
     shadowColor: '#25D366',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  shareButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    shadowRadius: 4,
+    elevation: 4,
+    minWidth: 48,
+    minHeight: 48,
   },
   continueButton: {
     backgroundColor: '#1E40AF',

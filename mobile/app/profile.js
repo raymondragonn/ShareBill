@@ -12,7 +12,11 @@ export default function ProfilePage() {
         const loadUser = async () => {
             try {
                 const storedUser = await AsyncStorage.getItem("user");
-                if (storedUser) setUser(JSON.parse(storedUser));
+                if (storedUser) {
+                    const userData = JSON.parse(storedUser);
+                    console.log("Datos del usuario:", userData);
+                    setUser(userData);
+                }
             } catch (error) {
                 console.error("Error cargando usuario:", error);
             }
@@ -69,11 +73,19 @@ export default function ProfilePage() {
                         <View style={styles.profileInfo}>
                             <View style={styles.avatar}>
                                 <Text style={styles.avatarText}>
-                                    {user.name?.[0]?.toUpperCase() || "U"}
+                                    {user.nombre && user.apellido 
+                                        ? `${user.nombre[0]}${user.apellido[0]}`.toUpperCase()
+                                        : (user.nombre || user.name || 'Usuario')[0]?.toUpperCase() || "U"
+                                    }
                                 </Text>
                             </View>
                             <View style={styles.userInfo}>
-                                <Text style={styles.userName}>{user.name}</Text>
+                                <Text style={styles.userName}>
+                                    {user.nombre && user.apellido 
+                                        ? `${user.nombre} ${user.apellido}` 
+                                        : user.nombre || user.name || 'Usuario'
+                                    }
+                                </Text>
                                 <Text style={styles.userEmail}>{user.email}</Text>
                                 <View style={styles.statusBadge}>
                                     <Ionicons name="checkmark-circle" size={16} color="#10B981" />
@@ -268,6 +280,7 @@ const styles = StyleSheet.create({
     // Menú
     menuSection: {
         paddingHorizontal: 24,
+        paddingTop: 20,
         paddingBottom: 20,
     },
     menuGroup: {

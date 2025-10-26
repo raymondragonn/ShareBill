@@ -9,11 +9,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function ProductosPage() {
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState(new Set());
+  const [productQuantities, setProductQuantities] = useState({}); // Cantidades disponibles por producto
+  const [userSelections, setUserSelections] = useState({}); // Cantidades seleccionadas por el usuario
   const [activeTab, setActiveTab] = useState('PRODUCTOS');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [isPaymentCompleted, setIsPaymentCompleted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [receiptInfo, setReceiptInfo] = useState(null);
+  const [ticketInfo, setTicketInfo] = useState(null);
+  const [isLoadingTicket, setIsLoadingTicket] = useState(false);
   const translateX = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -31,6 +35,9 @@ export default function ProductosPage() {
         
         setReceiptInfo(receipt);
         
+        // También establecer ticketInfo con los mismos datos
+        setTicketInfo(receipt);
+        
         // Convertir los artículos del recibo al formato de productos
         const productsFromReceipt = receipt.articles.map((article, index) => ({
           id: index + 1,
@@ -40,7 +47,19 @@ export default function ProductosPage() {
           lineTotal: parseFloat(article.monto_linea || 0)
         }));
         
+        // Inicializar cantidades disponibles y selecciones del usuario
+        const initialQuantities = {};
+        const initialSelections = {};
+        productsFromReceipt.forEach(product => {
+          initialQuantities[product.id] = product.quantity;
+          initialSelections[product.id] = 0;
+        });
+        
+        setProductQuantities(initialQuantities);
+        setUserSelections(initialSelections);
+        
         console.log('🛍️ Productos cargados:', productsFromReceipt);
+        console.log('📊 Cantidades iniciales:', initialQuantities);
         setProducts(productsFromReceipt);
       } else {
         console.log('⚠️ No se encontró recibo guardado');
@@ -59,15 +78,70 @@ export default function ProductosPage() {
   };
 
   const toggleProductSelection = (productId) => {
-    setSelectedProducts(prev => {
-      const newSelected = new Set(prev);
-      if (newSelected.has(productId)) {
+    const currentAvailable = productQuantities[productId] || 0;
+    const currentSelected = userSelections[productId] || 0;
+    
+    if (currentSelected > 0) {
+      // Si ya tiene elementos seleccionados, deseleccionar todo
+      setUserSelections(prev => ({
+        ...prev,
+        [productId]: 0
+      }));
+      setSelectedProducts(prev => {
+        const newSelected = new Set(prev);
         newSelected.delete(productId);
-      } else {
+        return newSelected;
+      });
+    } else if (currentAvailable > 0) {
+      // Si hay disponibilidad, seleccionar 1 elemento
+      setUserSelections(prev => ({
+        ...prev,
+        [productId]: 1
+      }));
+      setProductQuantities(prev => ({
+        ...prev,
+        [productId]: currentAvailable - 1
+      }));
+      setSelectedProducts(prev => {
+        const newSelected = new Set(prev);
         newSelected.add(productId);
+        return newSelected;
+      });
+    }
+  };
+
+  const adjustProductQuantity = (productId, delta) => {
+    const currentAvailable = productQuantities[productId] || 0;
+    const currentSelected = userSelections[productId] || 0;
+    const newSelected = Math.max(0, currentSelected + delta);
+    const maxSelectable = Math.min(newSelected, currentAvailable + currentSelected);
+    
+    if (newSelected <= maxSelectable && newSelected >= 0) {
+      setUserSelections(prev => ({
+        ...prev,
+        [productId]: newSelected
+      }));
+      
+      setProductQuantities(prev => ({
+        ...prev,
+        [productId]: currentAvailable - (newSelected - currentSelected)
+      }));
+      
+      // Actualizar selección si no hay elementos seleccionados
+      if (newSelected === 0) {
+        setSelectedProducts(prev => {
+          const newSelectedSet = new Set(prev);
+          newSelectedSet.delete(productId);
+          return newSelectedSet;
+        });
+      } else {
+        setSelectedProducts(prev => {
+          const newSelectedSet = new Set(prev);
+          newSelectedSet.add(productId);
+          return newSelectedSet;
+        });
       }
-      return newSelected;
-    });
+    }
   };
 
   const switchToTab = (tab) => {
@@ -109,11 +183,17 @@ export default function ProductosPage() {
   };
 
   const getSelectedItems = () => {
-    return products.filter(product => selectedProducts.has(product.id));
+    return products
+      .filter(product => selectedProducts.has(product.id))
+      .map(product => ({
+        ...product,
+        selectedQuantity: userSelections[product.id] || 0
+      }));
   };
 
   const getTotal = () => {
-    return getSelectedItems().reduce((total, product) => total + product.price, 0);
+    return getSelectedItems().reduce((total, product) => 
+      total + (product.price * product.selectedQuantity), 0);
   };
 
   const handlePayment = () => {
@@ -131,14 +211,15 @@ export default function ProductosPage() {
     setIsLoadingTicket(true);
     
     try {
-      const ticketDataString = await AsyncStorage.getItem('currentTicketData');
+      const ticketDataString = await AsyncStorage.getItem('currentReceipt');
       console.log('📦 Datos encontrados al refrescar:', !!ticketDataString);
       
       if (ticketDataString) {
         const ticketData = JSON.parse(ticketDataString);
         setTicketInfo(ticketData);
+        setReceiptInfo(ticketData);
         
-        const ticketProducts = ticketData.articulos?.map((articulo, index) => ({
+        const ticketProducts = ticketData.articles?.map((articulo, index) => ({
           id: index + 1,
           name: articulo.descripcion,
           price: articulo.precio_unitario,
@@ -162,10 +243,10 @@ export default function ProductosPage() {
   // Función de prueba para simular datos del ticket
   const handleTestTicketData = async () => {
     const testTicketData = {
-      "ticket_id": 2,
-      "nombre_negocio": "TERRAZA SALTILLO",
+      "receipt_id": 2,
+      "store_name": "TERRAZA SALTILLO",
       "total": 2149,
-      "articulos": [
+      "articles": [
         {
           "descripcion": "PARRILLADA DOS PERSO",
           "cantidad": 1,
@@ -188,7 +269,7 @@ export default function ProductosPage() {
     };
 
     try {
-      await AsyncStorage.setItem('currentTicketData', JSON.stringify(testTicketData));
+      await AsyncStorage.setItem('currentReceipt', JSON.stringify(testTicketData));
       console.log('🧪 Datos de prueba guardados en AsyncStorage');
       // Recargar la página para simular la llegada de datos
       window.location.reload();
@@ -224,15 +305,21 @@ export default function ProductosPage() {
         <View style={styles.productsGrid}>
           {products.map((product) => {
             const isSelected = selectedProducts.has(product.id);
+            const availableQuantity = productQuantities[product.id] || 0;
+            const selectedQuantity = userSelections[product.id] || 0;
+            const canSelect = availableQuantity > 0;
+            
             return (
               <TouchableOpacity 
                 key={product.id} 
                 style={[
                   styles.productCard,
-                  isSelected && styles.productCardSelected
+                  isSelected && styles.productCardSelected,
+                  !canSelect && styles.productCardDisabled
                 ]}
-                onPress={() => toggleProductSelection(product.id)}
-                activeOpacity={0.7}
+                onPress={() => canSelect && toggleProductSelection(product.id)}
+                activeOpacity={canSelect ? 0.7 : 1}
+                disabled={!canSelect}
               >
                 <View style={[
                   styles.cardContent,
@@ -240,22 +327,28 @@ export default function ProductosPage() {
                 ]}>
                   <Text style={[
                     styles.productName,
-                    isSelected && styles.productNameSelected
+                    isSelected && styles.productNameSelected,
+                    !canSelect && styles.productNameDisabled
                   ]}>
                     {product.name}
                   </Text>
                   <Text style={[
                     styles.productPrice,
-                    isSelected && styles.productPriceSelected
+                    isSelected && styles.productPriceSelected,
+                    !canSelect && styles.productPriceDisabled
                   ]}>
                     ${product.price.toFixed(2)}
                   </Text>
-                  {product.quantity && product.quantity > 1 && (
-                    <Text style={[
-                      styles.productQuantity,
-                      isSelected && styles.productQuantitySelected
-                    ]}>
-                      Cantidad: {product.quantity}
+                  <Text style={[
+                    styles.productQuantity,
+                    isSelected && styles.productQuantitySelected,
+                    !canSelect && styles.productQuantityDisabled
+                  ]}>
+                    Disponibles: {availableQuantity}
+                  </Text>
+                  {selectedQuantity > 0 && (
+                    <Text style={styles.selectedQuantity}>
+                      Seleccionados: {selectedQuantity}
                     </Text>
                   )}
                   {isSelected && (
@@ -264,6 +357,34 @@ export default function ProductosPage() {
                     </View>
                   )}
                 </View>
+                
+                {/* Controles de cantidad - solo mostrar si el producto está seleccionado Y hay más de 1 disponible */}
+                {isSelected && product.quantity > 1 && (
+                  <View style={styles.quantityControls}>
+                    <TouchableOpacity 
+                      style={[styles.quantityButton, selectedQuantity <= 0 && styles.quantityButtonDisabled]}
+                      onPress={() => adjustProductQuantity(product.id, -1)}
+                      disabled={selectedQuantity <= 0}
+                    >
+                      <Ionicons name="remove" size={16} color={selectedQuantity <= 0 ? "#C7C7CC" : "#007AFF"} />
+                    </TouchableOpacity>
+                    
+                    <Text style={styles.quantityText}>{selectedQuantity}</Text>
+                    
+                    <TouchableOpacity 
+                      style={[styles.quantityButton, availableQuantity <= 0 && styles.quantityButtonDisabled]}
+                      onPress={() => adjustProductQuantity(product.id, 1)}
+                      disabled={availableQuantity <= 0}
+                    >
+                      <Ionicons name="add" size={16} color={availableQuantity <= 0 ? "#C7C7CC" : "#007AFF"} />
+                    </TouchableOpacity>
+                  </View>
+                )}
+                
+                {/* Espaciador invisible para mantener altura consistente */}
+                {isSelected && product.quantity <= 1 && (
+                  <View style={styles.quantityControlsInvisible} />
+                )}
               </TouchableOpacity>
             );
           })}
@@ -285,7 +406,7 @@ export default function ProductosPage() {
                 <View style={styles.itemInfo}>
                   <Text style={styles.itemName}>{item.name}</Text>
                   <Text style={styles.itemDetails}>
-                    1 x ${item.price.toFixed(2)} = ${item.price.toFixed(2)}
+                    {item.selectedQuantity} x ${item.price.toFixed(2)} = ${(item.price * item.selectedQuantity).toFixed(2)}
                   </Text>
                 </View>
               </View>
@@ -454,6 +575,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.8)',
     fontWeight: '500',
+  },
+  ticketInfo: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '600',
+    marginTop: 8,
   },
   loadingContainer: {
     flex: 1,
@@ -761,5 +888,73 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
+  },
+  // Estilos para el sistema de cantidades
+  productCardDisabled: {
+    opacity: 0.5,
+    backgroundColor: '#F5F5F5',
+  },
+  productNameDisabled: {
+    color: '#C7C7CC',
+  },
+  productPriceDisabled: {
+    color: '#C7C7CC',
+  },
+  productQuantityDisabled: {
+    color: '#C7C7CC',
+  },
+  selectedQuantity: {
+    fontSize: 12,
+    color: '#007AFF',
+    fontWeight: '600',
+    marginTop: 2,
+    textAlign: 'center',
+  },
+  quantityControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  quantityControlsInvisible: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+    backgroundColor: 'transparent',
+    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    opacity: 0,
+  },
+  quantityButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  quantityButtonDisabled: {
+    backgroundColor: '#F5F5F5',
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  quantityText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1C1C1E',
+    marginHorizontal: 12,
+    minWidth: 20,
+    textAlign: 'center',
   },
 });

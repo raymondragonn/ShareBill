@@ -294,38 +294,6 @@ Este proyecto fue desarrollado para un hackathon/evento. Todos los derechos rese
 
 ---
 
-## 👥 Autores
-
-- Tu equipo de desarrollo
-
----
-
-## 🤝 Contribuciones
-
-Las contribuciones son bienvenidas. Por favor:
-1. Haz un fork del proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
----
-
-## 📧 Contacto
-
-¿Preguntas o sugerencias? Contacta al equipo a través de: [email@ejemplo.com](mailto:email@ejemplo.com)
-
----
-
-## 🙏 Agradecimientos
-
-- **Google Gemini** - Por la API de inteligencia artificial
-- **Expo** - Por el excelente SDK de React Native
-- **FastAPI** - Por el framework de backend moderno
-- **Comunidad open source** - Por todas las librerías utilizadas
-
----
-
 <div align="center">
   <p>Hecho con ❤️ para simplificar el reparto de gastos</p>
   <p>ShareBill - Divide, escanea, comparte</p>

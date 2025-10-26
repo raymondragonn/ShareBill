@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { LinearGradient } from 'expo-linear-gradient';
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_URL } from "../../config";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -47,7 +47,7 @@ export default function RegisterPage() {
             }
 
             try {
-                const response = await fetch("http://localhost:8000/users/signup", {
+                const response = await fetch(`${API_URL}/users/signup`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({

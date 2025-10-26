@@ -17,6 +17,7 @@ export default function AdminQRPage() {
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const animatedMembersRef = useRef(new Set());
 
   useEffect(() => {
     loadGroupData();
@@ -204,29 +205,76 @@ export default function AdminQRPage() {
   const GroupsContent = () => {
 
 
-    const UserCard = ({ user }) => (
-      <TouchableOpacity 
-        style={styles.userCard}
-        onPress={() => handleUserPress(user)}
-        activeOpacity={0.7}
-      >
-        <View style={styles.userInfo}>
-          <View style={styles.avatarContainer}>
-            <Text style={styles.avatarText}>{user.avatar}</Text>
-          </View>
-          <View style={styles.userDetails}>
-            <View style={styles.nameContainer}>
-              <Text style={styles.userName}>{user.name}</Text>
+    const AnimatedUserCard = ({ user, index }) => {
+      const isNewMember = !animatedMembersRef.current.has(user.id);
+      const fadeAnim = useRef(new Animated.Value(isNewMember ? 0 : 1)).current;
+      const slideAnim = useRef(new Animated.Value(isNewMember ? -50 : 0)).current;
+      const scaleAnim = useRef(new Animated.Value(isNewMember ? 0.8 : 1)).current;
+
+      useEffect(() => {
+        // Solo animar si es un nuevo miembro
+        if (isNewMember) {
+          animatedMembersRef.current.add(user.id);
+          
+          Animated.parallel([
+            Animated.timing(fadeAnim, {
+              toValue: 1,
+              duration: 500,
+              delay: index * 100,
+              useNativeDriver: true,
+            }),
+            Animated.spring(slideAnim, {
+              toValue: 0,
+              tension: 50,
+              friction: 7,
+              delay: index * 100,
+              useNativeDriver: true,
+            }),
+            Animated.spring(scaleAnim, {
+              toValue: 1,
+              tension: 50,
+              friction: 7,
+              delay: index * 100,
+              useNativeDriver: true,
+            }),
+          ]).start();
+        }
+      }, [user.id]);
+
+      return (
+        <Animated.View
+          style={{
+            opacity: fadeAnim,
+            transform: [
+              { translateX: slideAnim },
+              { scale: scaleAnim }
+            ],
+          }}
+        >
+          <TouchableOpacity 
+            style={styles.userCard}
+            onPress={() => handleUserPress(user)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.userInfo}>
+              <View style={styles.avatarContainer}>
+                <Text style={styles.avatarText}>{user.avatar}</Text>
+              </View>
+              <View style={styles.userDetails}>
+                <View style={styles.nameContainer}>
+                  <Text style={styles.userName}>{user.name}</Text>
+                </View>
+                <Text style={styles.userEmail}>{user.email}</Text>
+                <Text style={styles.joinTime}>{user.joinTime}</Text>
+              </View>
             </View>
-            <Text style={styles.userEmail}>{user.email}</Text>
-            <Text style={styles.joinTime}>{user.joinTime}</Text>
-          </View>
-        </View>
-        <View style={styles.userIndicator}>
-          <Ionicons name="chevron-forward" size={20} color="#949494" />
-        </View>
-      </TouchableOpacity>
-    );
+            <View style={styles.userIndicator}>
+              <Ionicons name="chevron-forward" size={20} color="#949494" />
+            </View>
+          </TouchableOpacity>
+        </Animated.View>
+      );
+    };
 
     return (
       <ScrollView style={styles.tabContent}>
@@ -236,11 +284,21 @@ export default function AdminQRPage() {
         </View>
         
         {groupMembers.length > 0 ? (
-          <View style={styles.membersList}>
-            {groupMembers.map((user) => (
-              <UserCard key={user.id} user={user} />
-            ))}
-          </View>
+          <>
+            <View style={styles.membersList}>
+              {groupMembers.map((user, index) => (
+                <AnimatedUserCard key={user.id} user={user} index={index} />
+              ))}
+            </View>
+            
+            <TouchableOpacity 
+              style={styles.continueButton}
+              onPress={() => router.push('/admin/escanear-ticket')}
+            >
+              <Ionicons name="scan" size={20} color="#FFFFFF" />
+              <Text style={styles.continueButtonText}>ESCANEAR TICKET</Text>
+            </TouchableOpacity>
+          </>
         ) : (
           <View style={styles.emptyState}>
             <Ionicons name="people-outline" size={64} color="#8E8E93" />
@@ -500,6 +558,31 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     maxWidth: 280,
+    marginBottom: 24,
+  },
+  continueButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1E40AF',
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 16,
+    marginTop: 20,
+    marginHorizontal: 24,
+    marginBottom: 20,
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    gap: 10,
+  },
+  continueButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   divider: {
     flexDirection: 'row',
